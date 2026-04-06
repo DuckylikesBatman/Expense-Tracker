@@ -1,14 +1,29 @@
 .login-page {
-    height: 100vh;
-    background-position: center;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-
+        margin: 0;
+        height: 100vh;
+        background-size: cover;      /* fills entire screen */
+        background-position: center; /* keeps image centered */
+        background-repeat: no-repeat;
+        align-items: center;
   }
-  
+  .login-header{
+    display: flex;
+    align-items: center;    
+    justify-content: center;
+    color: #72348e;
+    width: 400px;
+    height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(rgba(196, 187, 187, 0.554),rgba(255, 255, 255, 0.779),rgba(113, 107, 107, 0.517));
+    text-align: center;
+  }
   .login-container {
+
     display: block;
-    margin: 0;
+    margin: 20px;
     padding: 20px;
     width: 300px;
     height: 200px   ;
@@ -35,20 +50,21 @@
     box-shadow: 0 0 5px rgba(63, 44, 44, 0.6);
   }
   
-  .login-submit {
+  .button {
     border-radius: 20px;
     padding: 10px 20px;
     background-color: white;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.5s ease-in-out;
   }
   
-  .login-submit:hover {
+  .button:hover {
     transform: scale(1.05);
     background: linear-gradient(
-      rgb(225, 224, 177),
-      rgb(245, 242, 242),
-      rgb(239, 234, 187)
+      rgb(130, 89, 167),
+      rgba(216, 204, 231, 0.695),
+      rgb(150, 89, 203)
     );
+    transition: 0.5s ease-in-out;
   }
   
