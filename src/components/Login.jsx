@@ -1,5 +1,6 @@
   import "../styles/login.css";
-  import bg from "../assets/images/background.png";
+  import "../styles/app.css";
+
   import { useNavigate } from "react-router-dom";
 
   
@@ -12,14 +13,12 @@
       navigate("/home");
     };
     return (
-      <div className="login-page" style={{ backgroundImage: `url(${bg})` }}>
-        <h1 className="login-header">Expense Tracker</h1>
-        <div className="login-container">
+        <div className="login-card">
+          <h1 className="login-header">Expense Tracker</h1>
           <input className="login-inputs" placeholder="Username" />
           <input className="login-inputs" placeholder="Password" />
           <button onClick={handleLogin} className="button">Login</button>
         </div>
-      </div>
     );
     
   }
