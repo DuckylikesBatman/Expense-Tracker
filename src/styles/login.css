@@ -1,0 +1,54 @@
+.login-page {
+    height: 100vh;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+
+  }
+  
+  .login-container {
+    display: block;
+    margin: 0;
+    padding: 20px;
+    width: 300px;
+    height: 200px   ;
+    text-align: center;
+    border-radius: 10px;
+  
+    background: linear-gradient(
+      rgba(139, 145, 145, 0.7),
+      rgba(255, 255, 255, 0.5),
+      rgba(153, 159, 158, 0.7)
+    );
+  }
+  
+  .login-inputs {
+    margin: 10px;
+    width: 80%;
+    margin-bottom: 15px;
+    padding: 10px;
+  
+    border-radius: 20px;
+    border: 1px solid bisque;
+    text-align: center;
+  
+    box-shadow: 0 0 5px rgba(63, 44, 44, 0.6);
+  }
+  
+  .login-submit {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .login-submit:hover {
+    transform: scale(1.05);
+    background: linear-gradient(
+      rgb(225, 224, 177),
+      rgb(245, 242, 242),
+      rgb(239, 234, 187)
+    );
+  }
+  
