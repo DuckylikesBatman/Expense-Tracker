@@ -1,7 +1,7 @@
 body {
   background: url("../assets/images/background.png");
   font-family: 'Courier New', Courier, monospace;
-  color: wheat;
+  color: rgb(222, 134, 226);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,10 +37,9 @@ body {
   backdrop-filter: blur(24px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
 }
 
-.nav-buttons {
+.buttons {
   background-color: transparent;
   border-radius: 100px;
   width: auto;
@@ -56,36 +55,14 @@ body {
   transition: 0.3s ease-in-out;
 }
 
-.nav-buttons:hover {
+.buttons:hover {
   transform: scale(1.1);
   background-color: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
   box-shadow: 0 0 15px white;
 }
 
-.nav-buttons:active {
+.buttons:active {
   transform: scale(0.95);
 }
 
-.button {
-  border-radius: 20px;
-  padding: 10px 24px;
-  background-color: white;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: bold;
-  border: none;
-  color: #4a2070;
-  transition: 0.3s ease-in-out;
-}
-
-.button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(
-    rgb(130, 89, 167),
-    rgba(216, 204, 231, 0.695),
-    rgb(150, 89, 203)
-  );
-  color: white;
-}

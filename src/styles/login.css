@@ -1,16 +1,3 @@
-.login-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
 .login-card {
     display: flex;
     flex-direction: column;
@@ -18,7 +5,7 @@
     padding: 40px 32px;
     width: 320px;
     border-radius: 24px;
-    gap: 14px;
+    gap: 12px;
     background: rgba(40, 22, 60, 0.8);
     backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -29,7 +16,21 @@
     color: white;
     font-size: 1.6rem;
     letter-spacing: 1px;
-    margin: 0 0 20px 0;
+    margin: 0;
+}
+
+.login-card h3 {
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.login-card h6 {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.75rem;
+    font-weight: normal;
+    margin: 0 0 6px 0;
 }
 
 .login-inputs {
@@ -45,7 +46,6 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     outline: none;
     transition: 0.3s ease;
-    margin: 15px;
 }
 
 .login-inputs::placeholder {
@@ -55,4 +55,23 @@
 .login-inputs:focus {
     border-color: rgba(255, 255, 255, 0.6);
     background: rgba(255, 255, 255, 0.22);
+}
+
+.login-card h4 {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    font-weight: normal;
+    margin: 4px 0 0 0;
+}
+
+.sign-up {
+    color: rgb(106, 241, 210);
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+.sign-up:hover {
+    color: white;
+    text-decoration: underline;
 }
