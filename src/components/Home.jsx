@@ -14,7 +14,7 @@ function Home() {
                 <button className="buttons">About</button>
             </nav>
             <div className="Total-Expenses">
-                <h1>Total Spent</h1>
+                <h3 className="total-header">Total Spent</h3>
 
             </div>
             <div className="form-expense">
@@ -28,6 +28,11 @@ function Home() {
                     <button className="buttons expense">Shopping</button>
                     <button className="buttons expense">Other</button>
                 </div>
+                <button className="buttons expense">Add</button>
+            </div>
+            <div className="Recent-Expenses">
+                <h3>Recent Expenses</h3>
+
             </div>
     </div>
     )
