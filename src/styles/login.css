@@ -43,7 +43,6 @@
     color: white;
     font-family: inherit;
     font-size: 0.95rem;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     outline: none;
     transition: 0.3s ease;
 }
@@ -53,25 +52,61 @@
 }
 
 .login-inputs:focus {
-    border-color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(168, 85, 247, 0.7);
     background: rgba(255, 255, 255, 0.22);
 }
 
-.login-card h4 {
-    color: rgba(255, 255, 255, 0.7);
+.login-btn {
+    padding: 10px 40px;
+    border-radius: 20px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: 0.3s ease;
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+    margin-top: 4px;
+}
+
+.login-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 24px rgba(168, 85, 247, 0.7);
+}
+
+.login-btn:active {
+    transform: scale(0.97);
+}
+
+.signup-text {
+    color: rgba(255, 255, 255, 0.55);
     font-size: 0.8rem;
-    font-weight: normal;
     margin: 4px 0 0 0;
 }
 
 .sign-up {
-    color: rgb(106, 241, 210);
-    text-decoration: none;
-    font-weight: bold;
+    color: #6af1d2;
+    font-weight: 700;
+    cursor: pointer;
     transition: 0.2s ease;
 }
 
 .sign-up:hover {
     color: white;
     text-decoration: underline;
+}
+
+.input-error {
+    border-color: rgba(248, 113, 113, 0.7) !important;
+    background: rgba(248, 113, 113, 0.1) !important;
+}
+
+.error-msg {
+    color: #f87171;
+    font-size: 0.78rem;
+    margin: 0;
+    text-align: center;
 }
