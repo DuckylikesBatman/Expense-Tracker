@@ -53,7 +53,7 @@ function Login() {
 
       <button onClick={handleLogin} className="login-btn">Login</button>
       <p className="signup-text">
-        Don't have an account? <span className="sign-up">Sign Up</span>
+        Don't have an account? <span className="sign-up" onClick={() => navigate("/signup")} style={{cursor: "pointer"}}>Sign Up</span>
       </p>
     </div>
   );

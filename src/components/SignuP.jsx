@@ -3,7 +3,11 @@ import "../styles/signup.css"
 
 
 function Signup(){
+    return (
     <div>
-        <h1> This is the SignUp Page</h1>
+        <h1> This is the Signup Page</h1>
     </div>
+    )
 }
+
+export default Signup;
