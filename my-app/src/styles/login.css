@@ -1,0 +1,70 @@
+.login-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+        margin: 0;
+        height: 100vh;
+        background-size: cover;      /* fills entire screen */
+        background-position: center; /* keeps image centered */
+        background-repeat: no-repeat;
+        align-items: center;
+  }
+  .login-header{
+    display: flex;
+    align-items: center;    
+    justify-content: center;
+    color: #72348e;
+    width: 400px;
+    height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(rgba(196, 187, 187, 0.554),rgba(255, 255, 255, 0.779),rgba(113, 107, 107, 0.517));
+    text-align: center;
+  }
+  .login-container {
+
+    display: block;
+    margin: 20px;
+    padding: 20px;
+    width: 300px;
+    height: 200px   ;
+    text-align: center;
+    border-radius: 10px;
+  
+    background: linear-gradient(
+      rgba(139, 145, 145, 0.7),
+      rgba(255, 255, 255, 0.5),
+      rgba(153, 159, 158, 0.7)
+    );
+  }
+  
+  .login-inputs {
+    margin: 10px;
+    width: 80%;
+    margin-bottom: 15px;
+    padding: 10px;
+  
+    border-radius: 20px;
+    border: 1px solid bisque;
+    text-align: center;
+  
+    box-shadow: 0 0 5px rgba(63, 44, 44, 0.6);
+  }
+  
+  .button {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.5s ease-in-out;
+  }
+  
+  .button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(
+      rgb(130, 89, 167),
+      rgba(216, 204, 231, 0.695),
+      rgb(150, 89, 203)
+    );
+    transition: 0.5s ease-in-out;
+  }
+  

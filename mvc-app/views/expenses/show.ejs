@@ -1,0 +1,56 @@
+<%- include('../partials/header') %>
+<% let activePage = 'expenses' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <a href="/expenses" class="back-link">&larr; Back to Expenses</a>
+      <h1><%= expense.title %></h1>
+    </div>
+    <div class="action-group">
+      <a href="/expenses/<%= expense._id %>/edit" class="btn btn-outline">Edit</a>
+      <form action="/expenses/<%= expense._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this expense?')">
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="detail-card card">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">Amount</span>
+        <span class="detail-value amount-large">$<%= expense.amount.toFixed(2) %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Date</span>
+        <span class="detail-value"><%= new Date(expense.date).toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) %></span>
+      </div>
+      <% if (user.role === 'admin') { %>
+      <div class="detail-item">
+        <span class="detail-label">Owner</span>
+        <span class="detail-value"><%= expense.user.name %> (<%= expense.user.email %>)</span>
+      </div>
+      <% } %>
+      <div class="detail-item full-width">
+        <span class="detail-label">Description</span>
+        <span class="detail-value"><%= expense.description || 'No description provided.' %></span>
+      </div>
+      <div class="detail-item full-width">
+        <span class="detail-label">Categories</span>
+        <div class="badge-group">
+          <% if (expense.categories.length === 0) { %>
+            <span class="empty-msg">No categories assigned.</span>
+          <% } %>
+          <% expense.categories.forEach(cat => { %>
+            <a href="/categories/<%= cat._id %>" class="badge badge-link" style="background:<%= cat.color %>22;border-color:<%= cat.color %>55;color:<%= cat.color %>">
+              <%= cat.name %>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

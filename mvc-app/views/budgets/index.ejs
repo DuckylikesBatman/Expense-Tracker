@@ -1,0 +1,51 @@
+<%- include('../partials/header') %>
+<% let activePage = 'budgets' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Budgets</h1>
+      <p class="page-subtitle"><% if (user.role === 'admin') { %>All budgets<% } else { %>Your spending limits<% } %></p>
+    </div>
+    <a href="/budgets/new" class="btn btn-primary">+ New Budget</a>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (budgets.length === 0) { %>
+    <div class="empty-state">
+      <p>No budgets yet. <a href="/budgets/new" class="auth-link">Create one!</a></p>
+    </div>
+  <% } else { %>
+    <div class="cards-grid">
+      <% budgets.forEach(b => { %>
+        <div class="budget-card card">
+          <div class="budget-header">
+            <h3><a href="/budgets/<%= b._id %>" class="table-link"><%= b.name %></a></h3>
+            <% if (b.category) { %>
+              <span class="badge" style="background:<%= b.category.color %>22;border-color:<%= b.category.color %>55;color:<%= b.category.color %>"><%= b.category.name %></span>
+            <% } %>
+          </div>
+          <div class="budget-amount">$<%= b.amount.toFixed(2) %></div>
+          <div class="budget-meta">
+            <span class="period-badge"><%= b.period %></span>
+            <span><%= new Date(b.startDate).toLocaleDateString() %> – <%= new Date(b.endDate).toLocaleDateString() %></span>
+          </div>
+          <% if (user.role === 'admin') { %>
+            <p class="cat-meta" style="margin-top:8px">Owner: <%= b.user.name %></p>
+          <% } %>
+          <div class="action-group" style="margin-top:12px">
+            <a href="/budgets/<%= b._id %>" class="btn btn-sm btn-outline">View</a>
+            <a href="/budgets/<%= b._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+            <form action="/budgets/<%= b._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this budget?')">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

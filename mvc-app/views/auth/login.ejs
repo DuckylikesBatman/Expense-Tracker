@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <h1 class="auth-title">💰 Expense Tracker</h1>
+    <h2 class="auth-subtitle">Welcome Back</h2>
+    <p class="auth-desc">Please enter your credentials to log in</p>
+
+    <%- include('../partials/flash') %>
+
+    <form action="/auth/login" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Login</button>
+    </form>
+
+    <div class="auth-divider">or</div>
+
+    <form action="/auth/guest" method="POST">
+      <button type="submit" class="btn btn-secondary btn-full">Continue as Guest</button>
+    </form>
+
+    <p class="auth-footer">
+      Don't have an account?
+      <a href="/auth/register" class="auth-link">Sign Up</a>
+    </p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

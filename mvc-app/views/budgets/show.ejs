@@ -1,0 +1,67 @@
+<%- include('../partials/header') %>
+<% let activePage = 'budgets' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <a href="/budgets" class="back-link">&larr; Back to Budgets</a>
+      <h1><%= budget.name %></h1>
+    </div>
+    <div class="action-group">
+      <a href="/budgets/<%= budget._id %>/edit" class="btn btn-outline">Edit</a>
+      <form action="/budgets/<%= budget._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this budget?')">
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">Budget Limit</span>
+        <span class="detail-value amount-large">$<%= budget.amount.toFixed(2) %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Amount Spent</span>
+        <span class="detail-value amount-large" style="color:<%= spentAmount > budget.amount ? '#f87171' : '#6af1d2' %>">$<%= spentAmount.toFixed(2) %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Remaining</span>
+        <span class="detail-value amount-large" style="color:<%= remaining < 0 ? '#f87171' : '#a78bfa' %>">$<%= remaining.toFixed(2) %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Period</span>
+        <span class="detail-value"><span class="period-badge"><%= budget.period %></span></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Category</span>
+        <% if (budget.category) { %>
+          <a href="/categories/<%= budget.category._id %>" class="badge badge-link" style="background:<%= budget.category.color %>22;border-color:<%= budget.category.color %>55;color:<%= budget.category.color %>"><%= budget.category.name %></a>
+        <% } else { %>
+          <span>—</span>
+        <% } %>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Date Range</span>
+        <span class="detail-value"><%= new Date(budget.startDate).toLocaleDateString() %> – <%= new Date(budget.endDate).toLocaleDateString() %></span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span class="detail-label">Usage</span>
+        <span class="detail-label"><%= percentage %>%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:<%= percentage %>%;background:<%= percentage >= 100 ? '#f87171' : percentage >= 80 ? '#fbbf24' : '#6af1d2' %>"></div>
+      </div>
+      <% if (spentAmount > budget.amount) { %>
+        <p style="color:#f87171;margin-top:8px;font-size:0.85rem">⚠️ You have exceeded this budget by $<%= (spentAmount - budget.amount).toFixed(2) %></p>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

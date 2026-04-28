@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+<% let activePage = 'expenses' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <a href="/expenses" class="back-link">&larr; Back to Expenses</a>
+      <h1>Add Expense</h1>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="form-card card">
+    <form action="/expenses" method="POST" class="form">
+      <div class="form-group">
+        <label for="title">Title <span class="required">*</span></label>
+        <input type="text" id="title" name="title" class="form-input" placeholder="e.g. Coffee, Groceries" required minlength="2" maxlength="100" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="amount">Amount ($) <span class="required">*</span></label>
+          <input type="number" id="amount" name="amount" class="form-input" placeholder="0.00" step="0.01" min="0.01" required />
+        </div>
+        <div class="form-group">
+          <label for="date">Date <span class="required">*</span></label>
+          <input type="date" id="date" name="date" class="form-input" value="<%= new Date().toISOString().split('T')[0] %>" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" class="form-input form-textarea" placeholder="Optional details..." maxlength="500"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Categories <span class="hint">(select one or more)</span></label>
+        <div class="checkbox-grid">
+          <% categories.forEach(cat => { %>
+            <label class="checkbox-item">
+              <input type="checkbox" name="categories" value="<%= cat._id %>" />
+              <span class="checkbox-label" style="border-color:<%= cat.color %>55;color:<%= cat.color %>"><%= cat.name %></span>
+            </label>
+          <% }) %>
+          <% if (categories.length === 0) { %>
+            <p class="hint">No categories yet. <% if (user.role === 'admin') { %><a href="/categories/new" class="auth-link">Create one.</a><% } %></p>
+          <% } %>
+        </div>
+      </div>
+      <div class="form-actions">
+        <a href="/expenses" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">Add Expense</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

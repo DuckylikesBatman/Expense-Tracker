@@ -1,0 +1,51 @@
+<%- include('../partials/header') %>
+<% let activePage = 'admin' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <a href="/admin" class="back-link">&larr; Admin Dashboard</a>
+      <h1>Manage Users</h1>
+      <p class="page-subtitle">Total: <%= users.length %> users</p>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td><%= u.name %></td>
+            <td><%= u.email %></td>
+            <td><span class="role-badge role-<%= u.role %>"><%= u.role %></span></td>
+            <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+            <td class="action-cell">
+              <a href="/admin/users/<%= u._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+              <% if (u._id.toString() !== user._id.toString()) { %>
+                <form action="/admin/users/<%= u._id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Delete user <%= u.name %>?')">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              <% } else { %>
+                <span class="hint">(you)</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

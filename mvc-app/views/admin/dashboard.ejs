@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+<% let activePage = 'admin' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p class="page-subtitle">System overview and management</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <div class="stat-number"><%= userCount %></div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💸</div>
+      <div class="stat-info">
+        <div class="stat-number"><%= expenseCount %></div>
+        <div class="stat-label">Total Expenses</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏷️</div>
+      <div class="stat-info">
+        <div class="stat-number"><%= categoryCount %></div>
+        <div class="stat-label">Categories</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-info">
+        <div class="stat-number"><%= budgetCount %></div>
+        <div class="stat-label">Budgets</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Recent Expenses</h2>
+    <a href="/expenses" class="btn btn-sm btn-outline">View All</a>
+  </div>
+  <div class="card">
+    <% if (recentExpenses.length === 0) { %>
+      <p class="empty-msg">No expenses recorded yet.</p>
+    <% } else { %>
+      <table class="table">
+        <thead>
+          <tr><th>Title</th><th>User</th><th>Amount</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <% recentExpenses.forEach(e => { %>
+            <tr>
+              <td><a href="/expenses/<%= e._id %>" class="table-link"><%= e.title %></a></td>
+              <td><%= e.user.name %></td>
+              <td class="amount-cell">$<%= e.amount.toFixed(2) %></td>
+              <td><%= new Date(e.date).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <div class="admin-actions">
+    <a href="/admin/users" class="btn btn-primary">Manage Users</a>
+    <a href="/categories/new" class="btn btn-outline">New Category</a>
+    <a href="/expenses" class="btn btn-outline">All Expenses</a>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

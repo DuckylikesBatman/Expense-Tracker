@@ -1,0 +1,18 @@
+<nav class="navbar">
+  <a class="nav-brand" href="/expenses">💰 Expense Tracker</a>
+  <div class="nav-links">
+    <a href="/expenses" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'expenses' ? 'nav-active' : '' %>">Expenses</a>
+    <a href="/categories" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'nav-active' : '' %>">Categories</a>
+    <a href="/budgets" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'budgets' ? 'nav-active' : '' %>">Budgets</a>
+    <a href="/settings" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'nav-active' : '' %>">Settings</a>
+    <% if (user && user.role === 'admin') { %>
+      <a href="/admin" class="nav-link admin-link <%= typeof activePage !== 'undefined' && activePage === 'admin' ? 'nav-active' : '' %>">Admin</a>
+    <% } %>
+  </div>
+  <div class="nav-user">
+    <% if (user) { %>
+      <span class="nav-name">👤 <%= user.name %> <span class="role-badge role-<%= user.role %>"><%= user.role %></span></span>
+      <a href="/auth/logout" class="btn btn-sm btn-outline">Logout</a>
+    <% } %>
+  </div>
+</nav>

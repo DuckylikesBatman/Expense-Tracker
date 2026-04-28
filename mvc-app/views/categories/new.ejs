@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+<% let activePage = 'categories' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <a href="/categories" class="back-link">&larr; Back to Categories</a>
+      <h1>New Category</h1>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="form-card card">
+    <form action="/categories" method="POST" class="form">
+      <div class="form-group">
+        <label for="name">Name <span class="required">*</span></label>
+        <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Food, Transport" required minlength="2" maxlength="50" />
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" class="form-input form-textarea" placeholder="Optional description..." maxlength="200"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="color">Color</label>
+        <div class="color-row">
+          <input type="color" id="color" name="color" class="color-picker" value="#a855f7" />
+          <span class="hint">Pick a color for this category badge</span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <a href="/categories" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">Create Category</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,125 @@
+<%- include('../partials/header') %>
+<% let activePage = 'expenses' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Expenses</h1>
+      <p class="page-subtitle">
+        <% if (user.role === 'admin') { %>All users' expenses<% } else { %>Your expense log<% } %>
+      </p>
+    </div>
+    <a href="/expenses/new" class="btn btn-primary">+ Add Expense</a>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <%
+    const income = user.monthlyIncome || 0;
+    const remaining = income - spentThisMonth;
+    const pct = income > 0 ? Math.min((spentThisMonth / income) * 100, 100) : 0;
+    let statusClass = 'good';
+    let barColor = '#22c55e';
+    if (pct >= 90) { statusClass = 'danger'; barColor = '#ef4444'; }
+    else if (pct >= 60) { statusClass = 'warning'; barColor = '#eab308'; }
+    else if (pct >= 40) { statusClass = 'caution'; barColor = '#f97316'; }
+  %>
+
+  <% if (income > 0) { %>
+  <div class="income-tracker">
+    <div class="tracker-card">
+      <span class="tracker-label">Monthly Income</span>
+      <span class="tracker-value income-val">$<%= income.toFixed(2) %></span>
+      <a href="/settings" class="tracker-edit">Edit</a>
+    </div>
+    <div class="tracker-card">
+      <span class="tracker-label">Spent This Month</span>
+      <span class="tracker-value spent-val">$<%= spentThisMonth.toFixed(2) %></span>
+    </div>
+    <div class="tracker-card remaining-card <%= statusClass %>">
+      <span class="tracker-label">Remaining</span>
+      <span class="tracker-value remaining-val">
+        <%= remaining >= 0 ? '$' + remaining.toFixed(2) : '-$' + Math.abs(remaining).toFixed(2) %>
+      </span>
+      <% if (remaining < 0) { %>
+        <span class="tracker-over">Over budget!</span>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="spending-progress-wrap">
+    <div class="spending-progress-bar">
+      <div class="spending-progress-fill" style="width:<%= pct.toFixed(1) %>%;background:<%= barColor %>"></div>
+    </div>
+    <span class="spending-progress-label"><%= pct.toFixed(0) %>% of monthly income spent</span>
+  </div>
+  <% } else { %>
+  <div class="income-prompt">
+    <span>💡 Set your monthly income to track how much you have left this month.</span>
+    <a href="/settings" class="btn btn-sm btn-secondary" style="margin-left:12px">Set Income</a>
+  </div>
+  <% } %>
+
+  <div class="summary-bar" style="margin-top:20px">
+    <div class="summary-item">
+      <span class="summary-label">All-Time Total</span>
+      <span class="summary-value">$<%= total.toFixed(2) %></span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Total Expenses</span>
+      <span class="summary-value"><%= expenses.length %></span>
+    </div>
+  </div>
+
+  <% if (expenses.length === 0) { %>
+    <div class="empty-state">
+      <p>No expenses found. <a href="/expenses/new" class="auth-link">Add your first expense!</a></p>
+    </div>
+  <% } else { %>
+    <div class="card" style="overflow-x:auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <% if (user.role === 'admin') { %><th>User</th><% } %>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Categories</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% expenses.forEach(e => { %>
+            <tr>
+              <td><a href="/expenses/<%= e._id %>" class="table-link"><%= e.title %></a></td>
+              <% if (user.role === 'admin') { %>
+                <td><%= e.user.name %></td>
+              <% } %>
+              <td class="amount-cell">$<%= e.amount.toFixed(2) %></td>
+              <td><%= new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+              <td>
+                <div class="badge-group">
+                  <% if (e.categories.length === 0) { %>
+                    <span style="color:rgba(255,255,255,0.3);font-size:0.78rem">—</span>
+                  <% } %>
+                  <% e.categories.forEach(cat => { %>
+                    <span class="badge" style="background:<%= cat.color %>22;border-color:<%= cat.color %>55;color:<%= cat.color %>"><%= cat.name %></span>
+                  <% }) %>
+                </div>
+              </td>
+              <td class="action-cell">
+                <a href="/expenses/<%= e._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+                <form action="/expenses/<%= e._id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Delete this expense?')">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

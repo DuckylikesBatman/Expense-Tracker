@@ -1,0 +1,70 @@
+<%- include('../partials/header') %>
+<% let activePage = 'settings' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Settings</h1>
+      <p class="page-subtitle">Manage your account preferences</p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <div class="card settings-card">
+      <div class="settings-section-title">Monthly Income</div>
+      <p class="settings-desc">Set how much you earn per month. Your expense dashboard will show how much you have left.</p>
+
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+      <form action="/settings" method="POST" class="form" style="margin-top:20px">
+        <div class="form-group">
+          <label for="monthlyIncome">Monthly Income ($)</label>
+          <input
+            type="number"
+            id="monthlyIncome"
+            name="monthlyIncome"
+            class="form-input"
+            placeholder="e.g. 3000"
+            value="<%= user.monthlyIncome || '' %>"
+            min="0"
+            step="0.01"
+            required
+          />
+          <span class="hint">Enter your total monthly income or allowance</span>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card settings-card">
+      <div class="settings-section-title">Account Info</div>
+      <p class="settings-desc">Your current account details.</p>
+      <div class="settings-info-grid" style="margin-top:20px">
+        <div class="settings-info-item">
+          <span class="detail-label">Name</span>
+          <span class="detail-value"><%= user.name %></span>
+        </div>
+        <div class="settings-info-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value"><%= user.email %></span>
+        </div>
+        <div class="settings-info-item">
+          <span class="detail-label">Role</span>
+          <span class="role-badge role-<%= user.role %>"><%= user.role %></span>
+        </div>
+        <div class="settings-info-item">
+          <span class="detail-label">Monthly Income</span>
+          <span class="detail-value" style="color:#a78bfa;font-weight:700">
+            <% if (user.monthlyIncome > 0) { %>$<%= user.monthlyIncome.toFixed(2) %><% } else { %>Not set<% } %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

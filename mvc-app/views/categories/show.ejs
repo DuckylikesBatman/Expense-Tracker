@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+<% let activePage = 'categories' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <a href="/categories" class="back-link">&larr; Back to Categories</a>
+      <h1 style="color:<%= category.color %>"><span class="cat-dot" style="background:<%= category.color %>"></span> <%= category.name %></h1>
+    </div>
+    <% if (user.role === 'admin') { %>
+      <div class="action-group">
+        <a href="/categories/<%= category._id %>/edit" class="btn btn-outline">Edit</a>
+        <form action="/categories/<%= category._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this category?')">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <p><strong>Description:</strong> <%= category.description || 'No description.' %></p>
+    <p><strong>Created by:</strong> <%= category.createdBy ? category.createdBy.name : 'Unknown' %></p>
+  </div>
+
+  <h2>Expenses in this Category (<%= expenses.length %>)</h2>
+  <% if (expenses.length === 0) { %>
+    <div class="empty-state"><p>No expenses tagged with this category.</p></div>
+  <% } else { %>
+    <div class="card">
+      <table class="table">
+        <thead>
+          <tr><th>Title</th><th>User</th><th>Amount</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <% expenses.forEach(e => { %>
+            <tr>
+              <td><a href="/expenses/<%= e._id %>" class="table-link"><%= e.title %></a></td>
+              <td><%= e.user.name %></td>
+              <td class="amount-cell">$<%= e.amount.toFixed(2) %></td>
+              <td><%= new Date(e.date).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

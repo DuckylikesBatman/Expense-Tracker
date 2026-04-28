@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+<% let activePage = 'categories' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Categories</h1>
+      <p class="page-subtitle">Organize your expenses by category</p>
+    </div>
+    <% if (user.role === 'admin') { %>
+      <a href="/categories/new" class="btn btn-primary">+ New Category</a>
+    <% } %>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (categories.length === 0) { %>
+    <div class="empty-state">
+      <p>No categories yet.<% if (user.role === 'admin') { %> <a href="/categories/new" class="auth-link">Create the first one!</a><% } %></p>
+    </div>
+  <% } else { %>
+    <div class="cards-grid">
+      <% categories.forEach(cat => { %>
+        <div class="cat-card card" style="border-top: 3px solid <%= cat.color %>">
+          <div class="cat-header">
+            <span class="cat-dot" style="background:<%= cat.color %>"></span>
+            <h3><a href="/categories/<%= cat._id %>" class="table-link"><%= cat.name %></a></h3>
+          </div>
+          <p class="cat-desc"><%= cat.description || 'No description.' %></p>
+          <p class="cat-meta">Created by <%= cat.createdBy ? cat.createdBy.name : 'Unknown' %></p>
+          <% if (user.role === 'admin') { %>
+            <div class="action-group" style="margin-top:12px">
+              <a href="/categories/<%= cat._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+              <form action="/categories/<%= cat._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this category? It will be removed from all expenses.')">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>
