@@ -1,7 +1,14 @@
-// Auto-dismiss alerts after 5 seconds
-document.querySelectorAll('.alert').forEach(el => {
+// Auto-dismiss flash alerts after 5 seconds (not the over-budget banner)
+document.querySelectorAll('.alert-error, .alert-success').forEach(el => {
   setTimeout(() => el.style.display = 'none', 5000);
 });
+
+// Hamburger menu toggle
+const navToggle = document.getElementById('navToggle');
+const navbar = document.getElementById('mainNavbar');
+if (navToggle && navbar) {
+  navToggle.addEventListener('click', () => navbar.classList.toggle('nav-open'));
+}
 
 // Budget end-date must be after start-date
 const startDate = document.getElementById('startDate');

@@ -6,34 +6,74 @@
   <div class="page-header">
     <div>
       <h1>Budgets</h1>
-      <p class="page-subtitle"><% if (user.role === 'admin') { %>All budgets<% } else { %>Your spending limits<% } %></p>
+      <p class="page-subtitle"><% if (user.role === 'admin' || user.role === 'superadmin') { %>All budgets<% } else { %>Your spending limits<% } %></p>
     </div>
     <a href="/budgets/new" class="btn btn-primary">+ New Budget</a>
   </div>
 
   <%- include('../partials/flash') %>
 
-  <% if (budgets.length === 0) { %>
+  <% const overBudget = budgetsWithSpending.filter(item => item.isOverBudget) %>
+  <% if (overBudget.length > 0) { %>
+    <div class="alert alert-over-budget">
+      ⚠️ You are over the limit on <strong><%= overBudget.length %></strong> budget<%= overBudget.length > 1 ? 's' : '' %>:
+      <% overBudget.forEach(item => { %>
+        <a href="/budgets/<%= item.budget._id %>" class="over-budget-link"><%= item.budget.name %></a>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (budgetsWithSpending.length === 0) { %>
     <div class="empty-state">
       <p>No budgets yet. <a href="/budgets/new" class="auth-link">Create one!</a></p>
     </div>
   <% } else { %>
     <div class="cards-grid">
-      <% budgets.forEach(b => { %>
-        <div class="budget-card card">
+      <% budgetsWithSpending.forEach(item => { %>
+        <% const b = item.budget %>
+        <% const barColor = item.percentage >= 100 ? '#f87171' : item.percentage >= 80 ? '#fbbf24' : '#6af1d2' %>
+        <div class="budget-card card <%= item.isOverBudget ? 'card-over-budget' : '' %>">
           <div class="budget-header">
             <h3><a href="/budgets/<%= b._id %>" class="table-link"><%= b.name %></a></h3>
             <% if (b.category) { %>
               <span class="badge" style="background:<%= b.category.color %>22;border-color:<%= b.category.color %>55;color:<%= b.category.color %>"><%= b.category.name %></span>
             <% } %>
           </div>
-          <div class="budget-amount">$<%= b.amount.toFixed(2) %></div>
-          <div class="budget-meta">
+
+          <div class="budget-amounts-row">
+            <div>
+              <span class="budget-mini-label">Limit</span>
+              <div class="budget-amount">$<%= b.amount.toFixed(2) %></div>
+            </div>
+            <div>
+              <span class="budget-mini-label">Spent</span>
+              <div class="budget-spent" style="color:<%= item.isOverBudget ? '#f87171' : '#e2d9f3' %>">$<%= item.spentAmount.toFixed(2) %></div>
+            </div>
+            <div>
+              <span class="budget-mini-label">Left</span>
+              <div class="budget-remaining" style="color:<%= item.remaining < 0 ? '#f87171' : '#6af1d2' %>">
+                <%= item.remaining >= 0 ? '$' + item.remaining.toFixed(2) : '-$' + Math.abs(item.remaining).toFixed(2) %>
+              </div>
+            </div>
+          </div>
+
+          <div class="budget-progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:<%= item.percentage %>%;background:<%= barColor %>"></div>
+            </div>
+            <span class="budget-pct" style="color:<%= barColor %>"><%= item.percentage %>%</span>
+          </div>
+
+          <% if (item.isOverBudget) { %>
+            <p class="over-limit-msg">⚠️ Over limit by $<%= (item.spentAmount - b.amount).toFixed(2) %></p>
+          <% } %>
+
+          <div class="budget-meta" style="margin-top:8px">
             <span class="period-badge"><%= b.period %></span>
             <span><%= new Date(b.startDate).toLocaleDateString() %> – <%= new Date(b.endDate).toLocaleDateString() %></span>
           </div>
-          <% if (user.role === 'admin') { %>
-            <p class="cat-meta" style="margin-top:8px">Owner: <%= b.user.name %></p>
+          <% if (user.role === 'admin' || user.role === 'superadmin') { %>
+            <p class="cat-meta" style="margin-top:6px">Owner: <%= b.user.name %></p>
           <% } %>
           <div class="action-group" style="margin-top:12px">
             <a href="/budgets/<%= b._id %>" class="btn btn-sm btn-outline">View</a>

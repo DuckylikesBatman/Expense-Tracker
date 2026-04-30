@@ -2,17 +2,33 @@ const Budget = require('../models/Budget');
 const Category = require('../models/Category');
 const Expense = require('../models/Expense');
 
+const isAdmin = (user) => ['admin', 'superadmin'].includes(user.role);
+
 // GET /budgets
 exports.index = async (req, res) => {
   try {
-    const filter = req.user.role === 'admin' ? {} : { user: req.user._id };
+    const filter = isAdmin(req.user) ? {} : { user: req.user._id };
     const budgets = await Budget.find(filter)
       .populate('user', 'name email')
       .populate('category', 'name color')
       .sort({ createdAt: -1 });
-    res.render('budgets/index', { title: 'Budgets', budgets, user: req.user });
+
+    const budgetsWithSpending = await Promise.all(
+      budgets.map(async (b) => {
+        if (!b.category) return { budget: b, spentAmount: 0, percentage: 0, isOverBudget: false, remaining: b.amount };
+        const spent = await Expense.aggregate([
+          { $match: { user: b.user._id, categories: b.category._id, date: { $gte: b.startDate, $lte: b.endDate } } },
+          { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]);
+        const spentAmount = spent.length ? spent[0].total : 0;
+        const percentage = Math.min(Math.round((spentAmount / b.amount) * 100), 100);
+        return { budget: b, spentAmount, percentage, isOverBudget: spentAmount > b.amount, remaining: b.amount - spentAmount };
+      })
+    );
+
+    res.render('budgets/index', { title: 'Budgets', budgetsWithSpending, user: req.user });
   } catch (err) {
-    res.render('budgets/index', { title: 'Budgets', budgets: [], user: req.user, error: err.message });
+    res.render('budgets/index', { title: 'Budgets', budgetsWithSpending: [], user: req.user, error: err.message });
   }
 };
 
@@ -53,26 +69,17 @@ exports.show = async (req, res) => {
       .populate('user', 'name email')
       .populate('category', 'name color');
     if (!budget) return res.redirect('/budgets');
-    if (req.user.role !== 'admin' && budget.user._id.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && budget.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
-    // Compute total spent for this budget's category within the date range
     const spent = await Expense.aggregate([
-      {
-        $match: {
-          user: budget.user._id,
-          categories: budget.category._id,
-          date: { $gte: budget.startDate, $lte: budget.endDate }
-        }
-      },
+      { $match: { user: budget.user._id, categories: budget.category ? budget.category._id : null, date: { $gte: budget.startDate, $lte: budget.endDate } } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
     const spentAmount = spent.length ? spent[0].total : 0;
     const remaining = budget.amount - spentAmount;
     const percentage = Math.min(Math.round((spentAmount / budget.amount) * 100), 100);
-    res.render('budgets/show', {
-      title: budget.name, budget, spentAmount, remaining, percentage, user: req.user
-    });
+    res.render('budgets/show', { title: budget.name, budget, spentAmount, remaining, percentage, user: req.user });
   } catch (err) {
     res.redirect('/budgets');
   }
@@ -83,7 +90,7 @@ exports.editForm = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
     if (!budget) return res.redirect('/budgets');
-    if (req.user.role !== 'admin' && budget.user.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && budget.user.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     const categories = await Category.find().sort({ name: 1 });
@@ -98,7 +105,7 @@ exports.update = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
     if (!budget) return res.redirect('/budgets');
-    if (req.user.role !== 'admin' && budget.user.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && budget.user.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     const { name, amount, period, startDate, endDate, category } = req.body;
@@ -122,7 +129,7 @@ exports.destroy = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
     if (!budget) return res.redirect('/budgets');
-    if (req.user.role !== 'admin' && budget.user.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && budget.user.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     await Budget.findByIdAndDelete(req.params.id);
