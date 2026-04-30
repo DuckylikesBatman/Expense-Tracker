@@ -41,7 +41,11 @@ exports.show = async (req, res) => {
     const category = await Category.findById(req.params.id).populate('createdBy', 'name');
     if (!category) return res.redirect('/categories');
     // Expenses that include this category
-    const expenses = await Expense.find({ categories: category._id })
+    const expenseFilter = { categories: category._id };
+    if (!['admin', 'superadmin'].includes(req.user.role)) {
+      expenseFilter.user = req.user._id;
+    }
+    const expenses = await Expense.find(expenseFilter)
       .populate('user', 'name')
       .sort({ date: -1 });
     res.render('categories/show', { title: category.name, category, expenses, user: req.user });

@@ -42,7 +42,7 @@
             </label>
           <% }) %>
           <% if (categories.length === 0) { %>
-            <p class="hint">No categories yet. <% if (user.role === 'admin') { %><a href="/categories/new" class="auth-link">Create one.</a><% } %></p>
+            <p class="hint">No categories yet. <% if (user.role === 'admin' || user.role === 'superadmin') { %><a href="/categories/new" class="auth-link">Create one.</a><% } %></p>
           <% } %>
         </div>
       </div>

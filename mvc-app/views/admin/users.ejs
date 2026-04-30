@@ -26,19 +26,34 @@
       </thead>
       <tbody>
         <% users.forEach(u => { %>
+          <%
+            const isSelf = u._id.toString() === user._id.toString();
+            const targetIsSuperadmin = u.role === 'superadmin';
+            const targetIsAdmin = u.role === 'admin';
+            const viewerIsSuperadmin = user.role === 'superadmin';
+            // Admins can only act on regular users; superadmins can act on admins but not other superadmins
+            const canEdit = !isSelf && !targetIsSuperadmin && (viewerIsSuperadmin || (!targetIsAdmin));
+            const canDelete = !isSelf && !targetIsSuperadmin && (viewerIsSuperadmin || (!targetIsAdmin));
+          %>
           <tr>
             <td><%= u.name %></td>
             <td><%= u.email %></td>
             <td><span class="role-badge role-<%= u.role %>"><%= u.role %></span></td>
             <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
             <td class="action-cell">
-              <a href="/admin/users/<%= u._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
-              <% if (u._id.toString() !== user._id.toString()) { %>
-                <form action="/admin/users/<%= u._id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Delete user <%= u.name %>?')">
-                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                </form>
-              <% } else { %>
+              <% if (isSelf) { %>
                 <span class="hint">(you)</span>
+              <% } else if (canEdit || canDelete) { %>
+                <% if (canEdit) { %>
+                  <a href="/admin/users/<%= u._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+                <% } %>
+                <% if (canDelete) { %>
+                  <form action="/admin/users/<%= u._id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Delete user <%= u.name %>?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+                <% } %>
+              <% } else { %>
+                <span class="hint">—</span>
               <% } %>
             </td>
           </tr>

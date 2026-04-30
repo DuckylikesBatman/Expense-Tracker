@@ -8,13 +8,13 @@ router.use(protect);
 
 // Static routes first (must come before /:id)
 router.get('/', ctrl.index);
-router.get('/new', authorize('admin'), ctrl.newForm);
-router.post('/', authorize('admin'), ctrl.create);
+router.get('/new', authorize('admin', 'superadmin'), ctrl.newForm);
+router.post('/', authorize('admin', 'superadmin'), ctrl.create);
 
 // Dynamic routes after
 router.get('/:id', ctrl.show);
-router.get('/:id/edit', authorize('admin'), ctrl.editForm);
-router.put('/:id', authorize('admin'), ctrl.update);
-router.delete('/:id', authorize('admin'), ctrl.destroy);
+router.get('/:id/edit', authorize('admin', 'superadmin'), ctrl.editForm);
+router.put('/:id', authorize('admin', 'superadmin'), ctrl.update);
+router.delete('/:id', authorize('admin', 'superadmin'), ctrl.destroy);
 
 module.exports = router;

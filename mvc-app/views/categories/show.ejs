@@ -8,7 +8,7 @@
       <a href="/categories" class="back-link">&larr; Back to Categories</a>
       <h1 style="color:<%= category.color %>"><span class="cat-dot" style="background:<%= category.color %>"></span> <%= category.name %></h1>
     </div>
-    <% if (user.role === 'admin') { %>
+    <% if (user.role === 'admin' || user.role === 'superadmin') { %>
       <div class="action-group">
         <a href="/categories/<%= category._id %>/edit" class="btn btn-outline">Edit</a>
         <form action="/categories/<%= category._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this category?')">

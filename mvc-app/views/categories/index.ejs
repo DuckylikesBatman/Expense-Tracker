@@ -8,7 +8,7 @@
       <h1>Categories</h1>
       <p class="page-subtitle">Organize your expenses by category</p>
     </div>
-    <% if (user.role === 'admin') { %>
+    <% if (user.role === 'admin' || user.role === 'superadmin') { %>
       <a href="/categories/new" class="btn btn-primary">+ New Category</a>
     <% } %>
   </div>
@@ -17,7 +17,7 @@
 
   <% if (categories.length === 0) { %>
     <div class="empty-state">
-      <p>No categories yet.<% if (user.role === 'admin') { %> <a href="/categories/new" class="auth-link">Create the first one!</a><% } %></p>
+      <p>No categories yet.<% if (user.role === 'admin' || user.role === 'superadmin') { %> <a href="/categories/new" class="auth-link">Create the first one!</a><% } %></p>
     </div>
   <% } else { %>
     <div class="cards-grid">
@@ -29,7 +29,7 @@
           </div>
           <p class="cat-desc"><%= cat.description || 'No description.' %></p>
           <p class="cat-meta">Created by <%= cat.createdBy ? cat.createdBy.name : 'Unknown' %></p>
-          <% if (user.role === 'admin') { %>
+          <% if (user.role === 'admin' || user.role === 'superadmin') { %>
             <div class="action-group" style="margin-top:12px">
               <a href="/categories/<%= cat._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
               <form action="/categories/<%= cat._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this category? It will be removed from all expenses.')">

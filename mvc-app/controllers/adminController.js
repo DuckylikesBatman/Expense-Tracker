@@ -42,6 +42,12 @@ exports.editUserForm = async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.redirect('/admin/users');
+
+    // Admins cannot edit other admins or superadmins
+    if (req.user.role === 'admin' && target.role !== 'user') {
+      return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
+    }
+
     res.render('admin/editUser', { title: 'Edit User', target, user: req.user, error: null });
   } catch (err) {
     res.redirect('/admin/users');
@@ -51,8 +57,28 @@ exports.editUserForm = async (req, res) => {
 // PUT /admin/users/:id
 exports.updateUser = async (req, res) => {
   try {
-    const { name, role } = req.body;
-    await User.findByIdAndUpdate(req.params.id, { name: name.trim(), role }, { runValidators: true });
+    const target = await User.findById(req.params.id);
+    if (!target) return res.redirect('/admin/users');
+
+    // Admins cannot edit admins or superadmins
+    if (req.user.role === 'admin' && target.role !== 'user') {
+      return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
+    }
+
+    const updates = { name: req.body.name.trim() };
+
+    if (req.user.role === 'superadmin') {
+      // Superadmin can change roles, but cannot demote another superadmin
+      if (target.role === 'superadmin' && target._id.toString() !== req.user._id.toString()) {
+        return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
+      }
+      // Superadmin cannot change their own role
+      if (target._id.toString() !== req.user._id.toString()) {
+        updates.role = req.body.role;
+      }
+    }
+
+    await User.findByIdAndUpdate(req.params.id, updates, { runValidators: true });
     res.redirect('/admin/users');
   } catch (err) {
     const target = await User.findById(req.params.id);
@@ -63,10 +89,23 @@ exports.updateUser = async (req, res) => {
 // DELETE /admin/users/:id
 exports.deleteUser = async (req, res) => {
   try {
-    // Prevent deleting own account
     if (req.params.id === req.user._id.toString()) {
       return res.redirect('/admin/users');
     }
+
+    const target = await User.findById(req.params.id);
+    if (!target) return res.redirect('/admin/users');
+
+    // Nobody can delete a superadmin
+    if (target.role === 'superadmin') {
+      return res.redirect('/admin/users');
+    }
+
+    // Admins can only delete regular users
+    if (req.user.role === 'admin' && target.role !== 'user') {
+      return res.redirect('/admin/users');
+    }
+
     await User.findByIdAndDelete(req.params.id);
     res.redirect('/admin/users');
   } catch (err) {
