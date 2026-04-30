@@ -81,16 +81,21 @@ a { color: inherit; text-decoration: none; }
 .nav-user {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.nav-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
 }
 
 .nav-name {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.6);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  color: rgba(255,255,255,0.75);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ---- Role Badge ---- */
@@ -742,7 +747,6 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  max-width: 860px;
 }
 
 .settings-card { padding: 28px 30px; }
@@ -780,6 +784,115 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.75rem;
   border-top: 1px solid rgba(255,255,255,0.05);
   margin-top: auto;
+}
+
+/* ---- Dashboard ---- */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dash-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(40, 22, 60, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s;
+}
+.dash-stat-card:hover { border-color: rgba(168,85,247,0.45); }
+.dash-stat-card.dash-stat-danger { border-color: rgba(239,68,68,0.4); }
+
+.dash-stat-icon { font-size: 1.8rem; line-height: 1; }
+
+.dash-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #a78bfa;
+  line-height: 1.1;
+}
+.dash-stat-danger .dash-stat-value { color: #f87171; }
+
+.dash-stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+.dash-income-card { margin-bottom: 28px; }
+
+.dash-income-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dash-income-title { font-size: 1rem; font-weight: 700; color: white; }
+.dash-income-sub { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 3px; }
+.dash-income-remaining { font-size: 1.3rem; font-weight: 700; }
+
+.dash-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.dash-budget-card {
+  display: block;
+  padding: 16px 18px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.dash-budget-card:hover { border-color: rgba(168,85,247,0.4); transform: translateY(-1px); }
+
+.dash-budget-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.dash-budget-name { font-size: 0.9rem; font-weight: 600; color: white; }
+
+/* ---- Category spending breakdown ---- */
+.cat-spend-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.cat-spend-row:last-child { border-bottom: none; }
+.cat-spend-name { font-size: 0.85rem; font-weight: 600; min-width: 100px; }
+.cat-spend-bar-wrap { flex: 1; }
+.cat-spend-amount { font-size: 0.85rem; font-weight: 700; color: #f87171; min-width: 80px; text-align: right; }
+
+/* ---- Filter Form ---- */
+.filter-form {
+  padding: 16px 20px;
+  margin-bottom: 8px;
+}
+.filter-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.filter-row .form-group { margin: 0; }
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 0;
+  flex-shrink: 0;
 }
 
 /* ---- Hamburger Toggle ---- */
@@ -873,6 +986,11 @@ a { color: inherit; text-decoration: none; }
   .navbar { flex-wrap: wrap; }
 }
 
+@media (max-width: 900px) {
+  .dash-stats { grid-template-columns: 1fr 1fr; }
+  .dash-two-col { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 640px) {
   .navbar { padding: 12px 16px; }
   .main-content { padding: 20px 16px 40px; }
@@ -883,7 +1001,11 @@ a { color: inherit; text-decoration: none; }
   .detail-grid { grid-template-columns: 1fr; }
   .income-tracker { grid-template-columns: 1fr; }
   .settings-grid { grid-template-columns: 1fr; }
+  .nav-user-info { align-items: flex-start; }
   .tracker-value { font-size: 1.5rem; }
   .spending-progress-wrap { flex-direction: column; align-items: flex-start; gap: 6px; }
   .budget-amounts-row { gap: 10px; }
+  .dash-stats { grid-template-columns: 1fr 1fr; }
+  .filter-row { flex-direction: column; }
+  .filter-actions { width: 100%; }
 }

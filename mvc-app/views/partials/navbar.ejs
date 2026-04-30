@@ -2,6 +2,7 @@
   <a class="nav-brand" href="/expenses">💰 Expense Tracker</a>
   <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">&#9776;</button>
   <div class="nav-links" id="navLinks">
+    <a href="/dashboard" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'nav-active' : '' %>">Dashboard</a>
     <a href="/expenses" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'expenses' ? 'nav-active' : '' %>">Expenses</a>
     <a href="/categories" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'nav-active' : '' %>">Categories</a>
     <a href="/budgets" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'budgets' ? 'nav-active' : '' %>">Budgets</a>
@@ -10,10 +11,13 @@
       <a href="/admin" class="nav-link admin-link <%= typeof activePage !== 'undefined' && activePage === 'admin' ? 'nav-active' : '' %>">Admin</a>
     <% } %>
   </div>
+  <% if (user) { %>
   <div class="nav-user" id="navUser">
-    <% if (user) { %>
-      <span class="nav-name">👤 <%= user.name %> <span class="role-badge role-<%= user.role %>"><%= user.role %></span></span>
-      <a href="/auth/logout" class="btn btn-sm btn-outline">Logout</a>
-    <% } %>
+    <div class="nav-user-info">
+      <span class="nav-name">👤 <%= user.name %></span>
+      <span class="role-badge role-<%= user.role %>"><%= user.role %></span>
+    </div>
+    <a href="/auth/logout" class="btn btn-sm btn-outline">Logout</a>
   </div>
+  <% } %>
 </nav>

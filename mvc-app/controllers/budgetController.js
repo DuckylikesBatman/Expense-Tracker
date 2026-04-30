@@ -3,6 +3,16 @@ const Category = require('../models/Category');
 const Expense = require('../models/Expense');
 
 const isAdmin = (user) => ['admin', 'superadmin'].includes(user.role);
+const endOfDay = (d) => { const dt = new Date(d); dt.setHours(23, 59, 59, 999); return dt; };
+
+const getSpent = async (userId, categoryId, startDate, endDate) => {
+  const expenses = await Expense.find({
+    user: userId,
+    categories: categoryId,
+    date: { $gte: new Date(startDate), $lte: endOfDay(endDate) }
+  });
+  return expenses.reduce((sum, e) => sum + e.amount, 0);
+};
 
 // GET /budgets
 exports.index = async (req, res) => {
@@ -16,11 +26,7 @@ exports.index = async (req, res) => {
     const budgetsWithSpending = await Promise.all(
       budgets.map(async (b) => {
         if (!b.category) return { budget: b, spentAmount: 0, percentage: 0, isOverBudget: false, remaining: b.amount };
-        const spent = await Expense.aggregate([
-          { $match: { user: b.user._id, categories: b.category._id, date: { $gte: b.startDate, $lte: b.endDate } } },
-          { $group: { _id: null, total: { $sum: '$amount' } } }
-        ]);
-        const spentAmount = spent.length ? spent[0].total : 0;
+        const spentAmount = await getSpent(b.user._id, b.category._id, b.startDate, b.endDate);
         const percentage = Math.min(Math.round((spentAmount / b.amount) * 100), 100);
         return { budget: b, spentAmount, percentage, isOverBudget: spentAmount > b.amount, remaining: b.amount - spentAmount };
       })
@@ -72,11 +78,7 @@ exports.show = async (req, res) => {
     if (!isAdmin(req.user) && budget.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
-    const spent = await Expense.aggregate([
-      { $match: { user: budget.user._id, categories: budget.category ? budget.category._id : null, date: { $gte: budget.startDate, $lte: budget.endDate } } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const spentAmount = spent.length ? spent[0].total : 0;
+    const spentAmount = await getSpent(budget.user._id, budget.category._id, budget.startDate, budget.endDate);
     const remaining = budget.amount - spentAmount;
     const percentage = Math.min(Math.round((spentAmount / budget.amount) * 100), 100);
     res.render('budgets/show', { title: budget.name, budget, spentAmount, remaining, percentage, user: req.user });

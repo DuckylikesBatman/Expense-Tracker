@@ -1,11 +1,22 @@
 const Expense = require('../models/Expense');
 const Category = require('../models/Category');
 
+
 // GET /expenses
 exports.index = async (req, res) => {
   try {
     const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
     const filter = isAdmin ? {} : { user: req.user._id };
+
+    const { search, category, dateFrom, dateTo } = req.query;
+    if (search) filter.title = { $regex: search.trim(), $options: 'i' };
+    if (category) filter.categories = category;
+    if (dateFrom || dateTo) {
+      filter.date = {};
+      if (dateFrom) filter.date.$gte = new Date(dateFrom);
+      if (dateTo) filter.date.$lte = new Date(new Date(dateTo).setHours(23, 59, 59, 999));
+    }
+
     const expenses = await Expense.find(filter)
       .populate('user', 'name email')
       .populate('categories', 'name color')
@@ -16,9 +27,46 @@ exports.index = async (req, res) => {
     const myMonthly = await Expense.find({ user: req.user._id, date: { $gte: startOfMonth } });
     const spentThisMonth = myMonthly.reduce((sum, e) => sum + e.amount, 0);
 
-    res.render('expenses/index', { title: 'Expenses', expenses, total, spentThisMonth, user: req.user });
+    const categories = await Category.find().sort({ name: 1 });
+
+    res.render('expenses/index', {
+      title: 'Expenses', expenses, total, spentThisMonth, user: req.user, categories,
+      filters: { search: search || '', category: category || '', dateFrom: dateFrom || '', dateTo: dateTo || '' }
+    });
   } catch (err) {
-    res.render('expenses/index', { title: 'Expenses', expenses: [], total: 0, spentThisMonth: 0, user: req.user, error: err.message });
+    res.render('expenses/index', { title: 'Expenses', expenses: [], total: 0, spentThisMonth: 0, user: req.user, categories: [], filters: {}, error: err.message });
+  }
+};
+
+// GET /expenses/export
+exports.exportCSV = async (req, res) => {
+  try {
+    const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
+    const filter = isAdmin ? {} : { user: req.user._id };
+    const expenses = await Expense.find(filter)
+      .populate('categories', 'name')
+      .populate('user', 'name')
+      .sort({ date: -1 });
+
+    const escape = (v) => `"${String(v || '').replace(/"/g, '""')}"`;
+    const rows = [['Title', 'Amount ($)', 'Date', 'Categories', 'Description', 'Added By']];
+    expenses.forEach(e => {
+      rows.push([
+        escape(e.title),
+        escape(e.amount.toFixed(2)),
+        escape(new Date(e.date).toLocaleDateString()),
+        escape(e.categories.map(c => c.name).join('; ')),
+        escape(e.description || ''),
+        escape(e.user.name)
+      ]);
+    });
+
+    const csv = rows.map(r => r.join(',')).join('\n');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="expenses-${new Date().toISOString().split('T')[0]}.csv"`);
+    res.send(csv);
+  } catch (err) {
+    res.redirect('/expenses');
   }
 };
 

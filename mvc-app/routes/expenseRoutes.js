@@ -5,6 +5,7 @@ const { protect } = require('../middleware/auth');
 
 router.use(protect);
 
+router.get('/export', ctrl.exportCSV);
 router.get('/', ctrl.index);
 router.get('/new', ctrl.newForm);
 router.post('/', ctrl.create);

@@ -1,0 +1,184 @@
+<%- include('../partials/header') %>
+<% let activePage = 'dashboard' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Welcome back, <%= user.name.split(' ')[0] %> 👋</h1>
+      <p class="page-subtitle"><%= new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) %></p>
+    </div>
+    <a href="/expenses/new" class="btn btn-primary">+ Add Expense</a>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <%
+    const income = user.monthlyIncome || 0;
+    const remaining = income - spentThisMonth;
+    const pct = income > 0 ? Math.min((spentThisMonth / income) * 100, 100) : 0;
+    let barColor = '#22c55e';
+    if (pct >= 90) barColor = '#ef4444';
+    else if (pct >= 60) barColor = '#eab308';
+    else if (pct >= 40) barColor = '#f97316';
+  %>
+
+  <!-- Stats Row -->
+  <div class="dash-stats">
+    <div class="dash-stat-card">
+      <span class="dash-stat-icon">💸</span>
+      <div>
+        <div class="dash-stat-value">$<%= spentThisMonth.toFixed(2) %></div>
+        <div class="dash-stat-label">Spent This Month</div>
+      </div>
+    </div>
+    <div class="dash-stat-card">
+      <span class="dash-stat-icon">🧾</span>
+      <div>
+        <div class="dash-stat-value"><%= expenseCountThisMonth %></div>
+        <div class="dash-stat-label">Expenses This Month</div>
+      </div>
+    </div>
+    <div class="dash-stat-card">
+      <span class="dash-stat-icon">📦</span>
+      <div>
+        <div class="dash-stat-value">$<%= totalAllTime.toFixed(2) %></div>
+        <div class="dash-stat-label">All-Time Total</div>
+      </div>
+    </div>
+    <div class="dash-stat-card <%= overBudgetCount > 0 ? 'dash-stat-danger' : '' %>">
+      <span class="dash-stat-icon"><%= overBudgetCount > 0 ? '⚠️' : '✅' %></span>
+      <div>
+        <div class="dash-stat-value"><%= overBudgetCount %></div>
+        <div class="dash-stat-label">Budgets Over Limit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Income Progress -->
+  <% if (income > 0) { %>
+  <div class="card dash-income-card">
+    <div class="dash-income-header">
+      <div>
+        <div class="dash-income-title">Monthly Budget Tracker</div>
+        <div class="dash-income-sub">$<%= spentThisMonth.toFixed(2) %> spent of $<%= income.toFixed(2) %> income</div>
+      </div>
+      <div class="dash-income-remaining" style="color:<%= remaining < 0 ? '#f87171' : '#6af1d2' %>">
+        <%= remaining >= 0 ? '$' + remaining.toFixed(2) + ' left' : '$' + Math.abs(remaining).toFixed(2) + ' over' %>
+      </div>
+    </div>
+    <div class="progress-bar" style="margin-top:14px">
+      <div class="progress-fill" style="width:<%= pct.toFixed(1) %>%;background:<%= barColor %>"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px">
+      <span class="dash-income-sub">0%</span>
+      <span class="dash-income-sub" style="color:<%= barColor %>"><%= pct.toFixed(0) %>% used</span>
+      <span class="dash-income-sub">100%</span>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="income-prompt" style="margin-bottom:24px">
+    <span>💡 Set your monthly income in Settings to track how much you have left.</span>
+    <a href="/settings" class="btn btn-sm btn-secondary" style="margin-left:12px">Set Income</a>
+  </div>
+  <% } %>
+
+  <div class="dash-two-col">
+
+    <!-- Recent Expenses -->
+    <div>
+      <div class="section-header">
+        <h2>Recent Expenses</h2>
+        <a href="/expenses" class="btn btn-sm btn-outline">View All</a>
+      </div>
+      <div class="card">
+        <% if (recentExpenses.length === 0) { %>
+          <p class="empty-msg">No expenses yet. <a href="/expenses/new" class="auth-link">Add one!</a></p>
+        <% } else { %>
+          <table class="table">
+            <thead><tr><th>Title</th><th>Amount</th><th>Date</th></tr></thead>
+            <tbody>
+              <% recentExpenses.forEach(e => { %>
+                <tr>
+                  <td>
+                    <a href="/expenses/<%= e._id %>" class="table-link"><%= e.title %></a>
+                    <% if (e.categories.length > 0) { %>
+                      <div class="badge-group" style="margin-top:4px">
+                        <% e.categories.forEach(cat => { %>
+                          <span class="badge" style="background:<%= cat.color %>22;border-color:<%= cat.color %>55;color:<%= cat.color %>;font-size:0.62rem"><%= cat.name %></span>
+                        <% }) %>
+                      </div>
+                    <% } %>
+                  </td>
+                  <td class="amount-cell">$<%= e.amount.toFixed(2) %></td>
+                  <td style="color:rgba(255,255,255,0.45);font-size:0.8rem"><%= new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Budget Health -->
+    <div>
+      <div class="section-header">
+        <h2>Budget Health</h2>
+        <a href="/budgets" class="btn btn-sm btn-outline">View All</a>
+      </div>
+      <% if (budgetsWithSpending.length === 0) { %>
+        <div class="card"><p class="empty-msg">No budgets yet. <a href="/budgets/new" class="auth-link">Create one!</a></p></div>
+      <% } else { %>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <% budgetsWithSpending.slice(0,5).forEach(item => { %>
+            <% const bc = item.percentage >= 100 ? '#f87171' : item.percentage >= 80 ? '#fbbf24' : '#6af1d2' %>
+            <a href="/budgets/<%= item.budget._id %>" class="dash-budget-card card <%= item.isOverBudget ? 'card-over-budget' : '' %>">
+              <div class="dash-budget-top">
+                <span class="dash-budget-name"><%= item.budget.name %></span>
+                <span style="color:<%= bc %>;font-weight:700;font-size:0.85rem"><%= item.percentage %>%</span>
+              </div>
+              <% if (item.budget.category) { %>
+                <span class="badge" style="background:<%= item.budget.category.color %>22;border-color:<%= item.budget.category.color %>55;color:<%= item.budget.category.color %>;margin-bottom:8px"><%= item.budget.category.name %></span>
+              <% } %>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:<%= item.percentage %>%;background:<%= bc %>"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:4px">
+                <span style="font-size:0.72rem;color:rgba(255,255,255,0.4)">$<%= item.spentAmount.toFixed(2) %> spent</span>
+                <span style="font-size:0.72rem;color:rgba(255,255,255,0.4)">$<%= item.budget.amount.toFixed(2) %> limit</span>
+              </div>
+              <% if (item.isOverBudget) { %>
+                <span class="over-limit-msg">⚠️ Over limit by $<%= (item.spentAmount - item.budget.amount).toFixed(2) %></span>
+              <% } %>
+            </a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+
+  <!-- Top Categories This Month -->
+  <% if (topCategories.length > 0) { %>
+  <div class="section-header" style="margin-top:32px">
+    <h2>Top Spending Categories This Month</h2>
+  </div>
+  <div class="card">
+    <% const maxCatTotal = topCategories[0].total %>
+    <% topCategories.forEach(cat => { %>
+      <div class="cat-spend-row">
+        <span class="cat-spend-name" style="color:<%= cat.color %>"><%= cat.name %></span>
+        <div class="cat-spend-bar-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:<%= Math.round((cat.total/maxCatTotal)*100) %>%;background:<%= cat.color %>"></div>
+          </div>
+        </div>
+        <span class="cat-spend-amount">$<%= cat.total.toFixed(2) %></span>
+      </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

@@ -4,6 +4,7 @@ const methodOverride = require('method-override');
 const path = require('path');
 
 const authRoutes = require('./routes/authRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
@@ -27,6 +28,7 @@ app.use(loadUser); // Make user available in all templates
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/dashboard', dashboardRoutes);
 app.use('/expenses', expenseRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/budgets', budgetRoutes);
@@ -34,7 +36,7 @@ app.use('/admin', adminRoutes);
 app.use('/settings', settingsRoutes);
 
 // Home redirect
-app.get('/', (req, res) => res.redirect('/auth/login'));
+app.get('/', (req, res) => res.redirect(res.locals.user ? '/dashboard' : '/auth/login'));
 
 // 404
 app.use((req, res) => {

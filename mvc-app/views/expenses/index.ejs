@@ -7,10 +7,13 @@
     <div>
       <h1>Expenses</h1>
       <p class="page-subtitle">
-        <% if (user.role === 'admin') { %>All users' expenses<% } else { %>Your expense log<% } %>
+        <% if (user.role === 'admin' || user.role === 'superadmin') { %>All users' expenses<% } else { %>Your expense log<% } %>
       </p>
     </div>
-    <a href="/expenses/new" class="btn btn-primary">+ Add Expense</a>
+    <div class="action-group">
+      <a href="/expenses/export" class="btn btn-outline">⬇ Export CSV</a>
+      <a href="/expenses/new" class="btn btn-primary">+ Add Expense</a>
+    </div>
   </div>
 
   <%- include('../partials/flash') %>
@@ -47,7 +50,6 @@
       <% } %>
     </div>
   </div>
-
   <div class="spending-progress-wrap">
     <div class="spending-progress-bar">
       <div class="spending-progress-fill" style="width:<%= pct.toFixed(1) %>%;background:<%= barColor %>"></div>
@@ -61,20 +63,57 @@
   </div>
   <% } %>
 
+  <!-- Filter Form -->
+  <form action="/expenses" method="GET" class="filter-form card">
+    <div class="filter-row">
+      <div class="form-group" style="flex:2;min-width:160px">
+        <label>Search</label>
+        <input type="text" name="search" class="form-input" placeholder="Search by title..." value="<%= filters.search %>" />
+      </div>
+      <div class="form-group" style="flex:1;min-width:140px">
+        <label>Category</label>
+        <select name="category" class="form-input form-select">
+          <option value="">All Categories</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat._id %>" <%= filters.category === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;min-width:130px">
+        <label>From</label>
+        <input type="date" name="dateFrom" class="form-input" value="<%= filters.dateFrom %>" />
+      </div>
+      <div class="form-group" style="flex:1;min-width:130px">
+        <label>To</label>
+        <input type="date" name="dateTo" class="form-input" value="<%= filters.dateTo %>" />
+      </div>
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="/expenses" class="btn btn-outline">Clear</a>
+      </div>
+    </div>
+  </form>
+
   <div class="summary-bar" style="margin-top:20px">
     <div class="summary-item">
-      <span class="summary-label">All-Time Total</span>
+      <span class="summary-label">
+        <% if (filters.search || filters.category || filters.dateFrom || filters.dateTo) { %>Filtered Total<% } else { %>All-Time Total<% } %>
+      </span>
       <span class="summary-value">$<%= total.toFixed(2) %></span>
     </div>
     <div class="summary-item">
-      <span class="summary-label">Total Expenses</span>
+      <span class="summary-label">Results</span>
       <span class="summary-value"><%= expenses.length %></span>
     </div>
   </div>
 
   <% if (expenses.length === 0) { %>
     <div class="empty-state">
-      <p>No expenses found. <a href="/expenses/new" class="auth-link">Add your first expense!</a></p>
+      <% if (filters.search || filters.category || filters.dateFrom || filters.dateTo) { %>
+        <p>No expenses match your filters. <a href="/expenses" class="auth-link">Clear filters</a></p>
+      <% } else { %>
+        <p>No expenses found. <a href="/expenses/new" class="auth-link">Add your first expense!</a></p>
+      <% } %>
     </div>
   <% } else { %>
     <div class="card" style="overflow-x:auto">
@@ -82,7 +121,7 @@
         <thead>
           <tr>
             <th>Title</th>
-            <% if (user.role === 'admin') { %><th>User</th><% } %>
+            <% if (user.role === 'admin' || user.role === 'superadmin') { %><th>User</th><% } %>
             <th>Amount</th>
             <th>Date</th>
             <th>Categories</th>
@@ -93,7 +132,7 @@
           <% expenses.forEach(e => { %>
             <tr>
               <td><a href="/expenses/<%= e._id %>" class="table-link"><%= e.title %></a></td>
-              <% if (user.role === 'admin') { %>
+              <% if (user.role === 'admin' || user.role === 'superadmin') { %>
                 <td><%= e.user.name %></td>
               <% } %>
               <td class="amount-cell">$<%= e.amount.toFixed(2) %></td>
