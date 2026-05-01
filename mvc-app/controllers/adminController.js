@@ -30,10 +30,30 @@ exports.dashboard = async (req, res) => {
 // GET /admin/users
 exports.listUsers = async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.render('admin/users', { title: 'Manage Users', users, user: req.user, error: null, success: null });
+    const { search = '', role = '' } = req.query;
+    const query = {};
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), 'i');
+      query.$or = [{ name: regex }, { email: regex }];
+    }
+
+    if (role && ['user', 'admin', 'superadmin'].includes(role)) {
+      query.role = role;
+    }
+
+    const users = await User.find(query).sort({ createdAt: -1 });
+    res.render('admin/users', {
+      title: 'Manage Users', users, user: req.user,
+      error: null, success: null,
+      filters: { search, role }
+    });
   } catch (err) {
-    res.render('admin/users', { title: 'Manage Users', users: [], user: req.user, error: err.message, success: null });
+    res.render('admin/users', {
+      title: 'Manage Users', users: [], user: req.user,
+      error: err.message, success: null,
+      filters: { search: '', role: '' }
+    });
   }
 };
 
