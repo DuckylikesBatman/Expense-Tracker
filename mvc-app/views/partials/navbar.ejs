@@ -6,6 +6,7 @@
     <a href="/expenses" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'expenses' ? 'nav-active' : '' %>">Expenses</a>
     <a href="/categories" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'categories' ? 'nav-active' : '' %>">Categories</a>
     <a href="/budgets" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'budgets' ? 'nav-active' : '' %>">Budgets</a>
+    <a href="/income" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'income' ? 'nav-active' : '' %>">Income</a>
     <a href="/settings" class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'nav-active' : '' %>">Settings</a>
     <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
       <a href="/admin" class="nav-link admin-link <%= typeof activePage !== 'undefined' && activePage === 'admin' ? 'nav-active' : '' %>">Admin</a>

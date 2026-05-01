@@ -1,0 +1,116 @@
+<%- include('../partials/header') %>
+<% let activePage = 'income' %>
+<%- include('../partials/navbar') %>
+
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Extra Income</h1>
+      <p class="page-subtitle">Track side jobs, bonuses, winnings, and other earnings</p>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+  <!-- This Month Summary -->
+  <div class="dash-stats" style="margin-bottom:24px">
+    <div class="dash-stat-card">
+      <span class="dash-stat-icon">💼</span>
+      <div>
+        <div class="dash-stat-value">$<%= (user.monthlyIncome || 0).toFixed(2) %></div>
+        <div class="dash-stat-label">Base Salary</div>
+      </div>
+    </div>
+    <div class="dash-stat-card">
+      <span class="dash-stat-icon">➕</span>
+      <div>
+        <div class="dash-stat-value" style="color:#6af1d2">$<%= extraThisMonth.toFixed(2) %></div>
+        <div class="dash-stat-label">Extra This Month</div>
+      </div>
+    </div>
+    <div class="dash-stat-card">
+      <span class="dash-stat-icon">💰</span>
+      <div>
+        <div class="dash-stat-value" style="color:#a78bfa">$<%= totalThisMonth.toFixed(2) %></div>
+        <div class="dash-stat-label">Total Income This Month</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Income Form -->
+  <div class="card filter-form" style="margin-bottom:24px">
+    <div class="settings-section-title" style="margin-bottom:16px">+ Log Extra Income</div>
+    <form action="/income" method="POST">
+      <div class="filter-row" style="align-items:flex-end;flex-wrap:wrap;gap:14px">
+        <div class="form-group" style="min-width:130px">
+          <label>Amount ($)</label>
+          <input type="number" name="amount" class="form-input" placeholder="0.00" min="0.01" step="0.01" required>
+        </div>
+        <div class="form-group" style="min-width:150px">
+          <label>Source</label>
+          <select name="source" class="form-input form-select">
+            <% sources.forEach(s => { %>
+              <option value="<%= s %>"><%= s.charAt(0).toUpperCase() + s.slice(1).replace('-', ' ') %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1;min-width:180px">
+          <label>Description <span class="hint">(optional)</span></label>
+          <input type="text" name="description" class="form-input" placeholder="e.g. Freelance logo design" maxlength="200">
+        </div>
+        <div class="form-group" style="min-width:150px">
+          <label>Date</label>
+          <input type="date" name="date" class="form-input" value="<%= new Date().toISOString().split('T')[0] %>" required>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Entries List -->
+  <div class="card">
+    <% if (entries.length === 0) { %>
+      <p class="empty-msg">No extra income logged yet. Add your first entry above!</p>
+    <% } else { %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% entries.forEach(e => { %>
+            <tr>
+              <td>
+                <span class="role-badge" style="background:rgba(107,197,210,0.12);border-color:rgba(106,241,210,0.35);color:#6af1d2">
+                  <%= e.source.charAt(0).toUpperCase() + e.source.slice(1).replace('-', ' ') %>
+                </span>
+              </td>
+              <td style="color:rgba(255,255,255,0.6)"><%= e.description || '—' %></td>
+              <td class="amount-cell" style="color:#6af1d2">+$<%= e.amount.toFixed(2) %></td>
+              <td style="color:rgba(255,255,255,0.45);font-size:0.8rem">
+                <%= new Date(e.date).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %>
+              </td>
+              <td class="action-cell">
+                <form action="/income/<%= e._id %>?_method=DELETE" method="POST" style="display:inline"
+                  onsubmit="return confirm('Remove this income entry?')">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,6 +1,7 @@
 const Expense = require('../models/Expense');
 const Budget = require('../models/Budget');
 const Category = require('../models/Category');
+const IncomeEntry = require('../models/IncomeEntry');
 
 const endOfDay = (d) => { const dt = new Date(d); dt.setHours(23, 59, 59, 999); return dt; };
 
@@ -24,6 +25,10 @@ exports.index = async (req, res) => {
       .populate('categories', 'name color');
     const spentThisMonth = monthlyExpenses.reduce((s, e) => s + e.amount, 0);
     const expenseCountThisMonth = monthlyExpenses.length;
+
+    // Extra income this month
+    const extraIncomeEntries = await IncomeEntry.find({ user: userId, date: { $gte: startOfMonth } });
+    const extraIncomeThisMonth = extraIncomeEntries.reduce((s, e) => s + e.amount, 0);
 
     // All-time total
     const allExpenses = await Expense.find({ user: userId });
@@ -69,7 +74,8 @@ exports.index = async (req, res) => {
       budgetsWithSpending,
       overBudgetCount,
       topCategories,
-      startOfMonth
+      startOfMonth,
+      extraIncomeThisMonth
     });
   } catch (err) {
     res.redirect('/expenses');

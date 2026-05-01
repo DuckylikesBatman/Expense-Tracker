@@ -10,6 +10,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const incomeRoutes = require('./routes/incomeRoutes');
 const { loadUser } = require('./middleware/auth');
 
 const app = express();
@@ -34,6 +35,7 @@ app.use('/categories', categoryRoutes);
 app.use('/budgets', budgetRoutes);
 app.use('/admin', adminRoutes);
 app.use('/settings', settingsRoutes);
+app.use('/income', incomeRoutes);
 
 // Home redirect
 app.get('/', (req, res) => res.redirect(res.locals.user ? '/dashboard' : '/auth/login'));

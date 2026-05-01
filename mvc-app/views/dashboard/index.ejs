@@ -14,7 +14,8 @@
   <%- include('../partials/flash') %>
 
   <%
-    const income = user.monthlyIncome || 0;
+    const baseSalary = user.monthlyIncome || 0;
+    const income = baseSalary + (extraIncomeThisMonth || 0);
     const remaining = income - spentThisMonth;
     const pct = income > 0 ? Math.min((spentThisMonth / income) * 100, 100) : 0;
     let barColor = '#22c55e';
@@ -61,7 +62,12 @@
     <div class="dash-income-header">
       <div>
         <div class="dash-income-title">Monthly Budget Tracker</div>
-        <div class="dash-income-sub">$<%= spentThisMonth.toFixed(2) %> spent of $<%= income.toFixed(2) %> income</div>
+        <div class="dash-income-sub">
+          $<%= spentThisMonth.toFixed(2) %> spent of $<%= income.toFixed(2) %> total income
+          <% if (extraIncomeThisMonth > 0) { %>
+            <span style="color:#6af1d2;margin-left:6px">(+$<%= extraIncomeThisMonth.toFixed(2) %> extra)</span>
+          <% } %>
+        </div>
       </div>
       <div class="dash-income-remaining" style="color:<%= remaining < 0 ? '#f87171' : '#6af1d2' %>">
         <%= remaining >= 0 ? '$' + remaining.toFixed(2) + ' left' : '$' + Math.abs(remaining).toFixed(2) + ' over' %>
@@ -74,6 +80,9 @@
       <span class="dash-income-sub">0%</span>
       <span class="dash-income-sub" style="color:<%= barColor %>"><%= pct.toFixed(0) %>% used</span>
       <span class="dash-income-sub">100%</span>
+    </div>
+    <div style="margin-top:10px;text-align:right">
+      <a href="/income" class="btn btn-sm btn-secondary">+ Log Extra Income</a>
     </div>
   </div>
   <% } else { %>
