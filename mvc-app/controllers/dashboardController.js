@@ -78,6 +78,19 @@ exports.index = async (req, res) => {
       extraIncomeThisMonth
     });
   } catch (err) {
-    res.redirect('/expenses');
+    res.render('dashboard/index', {
+      title: 'Dashboard',
+      user: req.user,
+      spentThisMonth: 0,
+      expenseCountThisMonth: 0,
+      totalAllTime: 0,
+      recentExpenses: [],
+      budgetsWithSpending: [],
+      overBudgetCount: 0,
+      topCategories: [],
+      startOfMonth: new Date(),
+      extraIncomeThisMonth: 0,
+      error: 'Could not load dashboard data.'
+    });
   }
 };

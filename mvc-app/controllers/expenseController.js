@@ -31,7 +31,8 @@ exports.index = async (req, res) => {
 
     res.render('expenses/index', {
       title: 'Expenses', expenses, total, spentThisMonth, user: req.user, categories,
-      filters: { search: search || '', category: category || '', dateFrom: dateFrom || '', dateTo: dateTo || '' }
+      filters: { search: search || '', category: category || '', dateFrom: dateFrom || '', dateTo: dateTo || '' },
+      error: req.query.error || null
     });
   } catch (err) {
     res.render('expenses/index', { title: 'Expenses', expenses: [], total: 0, spentThisMonth: 0, user: req.user, categories: [], filters: {}, error: err.message });
@@ -66,7 +67,7 @@ exports.exportCSV = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="expenses-${new Date().toISOString().split('T')[0]}.csv"`);
     res.send(csv);
   } catch (err) {
-    res.redirect('/expenses');
+    res.redirect('/expenses?error=' + encodeURIComponent('Export failed. Please try again.'));
   }
 };
 
@@ -84,10 +85,12 @@ exports.newForm = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { title, amount, date, description, categories } = req.body;
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) throw new Error('Amount must be a valid positive number.');
     const cats = categories ? (Array.isArray(categories) ? categories : [categories]) : [];
     await Expense.create({
       title: title.trim(),
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       date: date || Date.now(),
       description: description ? description.trim() : '',
       user: req.user._id,
@@ -140,9 +143,11 @@ exports.update = async (req, res) => {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     const { title, amount, date, description, categories } = req.body;
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) throw new Error('Amount must be a valid positive number.');
     const cats = categories ? (Array.isArray(categories) ? categories : [categories]) : [];
     expense.title = title.trim();
-    expense.amount = parseFloat(amount);
+    expense.amount = parsedAmount;
     expense.date = date;
     expense.description = description ? description.trim() : '';
     expense.categories = cats;

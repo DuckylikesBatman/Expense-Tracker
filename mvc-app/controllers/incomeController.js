@@ -23,7 +23,7 @@ exports.index = async (req, res) => {
       extraThisMonth,
       totalThisMonth,
       sources: SOURCES,
-      error: null,
+      error: req.query.error || null,
       success: null
     });
   } catch (err) {
@@ -77,9 +77,39 @@ exports.create = async (req, res) => {
   }
 };
 
+exports.editForm = async (req, res) => {
+  try {
+    const entry = await IncomeEntry.findOne({ _id: req.params.id, user: req.user._id });
+    if (!entry) return res.redirect('/income');
+    res.render('income/edit', { title: 'Edit Income Entry', user: req.user, entry, sources: SOURCES, error: null });
+  } catch (err) {
+    res.redirect('/income');
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const entry = await IncomeEntry.findOne({ _id: req.params.id, user: req.user._id });
+    if (!entry) return res.redirect('/income');
+    const amount = parseFloat(req.body.amount);
+    if (isNaN(amount) || amount <= 0) throw new Error('Amount must be greater than 0');
+    entry.amount = amount;
+    entry.source = SOURCES.includes(req.body.source) ? req.body.source : 'other';
+    entry.description = req.body.description ? req.body.description.trim() : '';
+    entry.date = req.body.date ? new Date(req.body.date) : entry.date;
+    await entry.save();
+    res.redirect('/income');
+  } catch (err) {
+    const entry = await IncomeEntry.findOne({ _id: req.params.id, user: req.user._id });
+    res.render('income/edit', { title: 'Edit Income Entry', user: req.user, entry, sources: SOURCES, error: err.message });
+  }
+};
+
 exports.destroy = async (req, res) => {
   try {
     await IncomeEntry.findOneAndDelete({ _id: req.params.id, user: req.user._id });
-  } catch (_) {}
+  } catch (err) {
+    return res.redirect('/income?error=' + encodeURIComponent('Could not delete entry.'));
+  }
   res.redirect('/income');
 };

@@ -99,6 +99,7 @@
                 <%= new Date(e.date).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %>
               </td>
               <td class="action-cell">
+                <a href="/income/<%= e._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
                 <form action="/income/<%= e._id %>?_method=DELETE" method="POST" style="display:inline"
                   onsubmit="return confirm('Remove this income entry?')">
                   <button type="submit" class="btn btn-sm btn-danger">Delete</button>

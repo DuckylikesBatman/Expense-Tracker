@@ -52,9 +52,12 @@ exports.newForm = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { name, amount, period, startDate, endDate, category } = req.body;
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount < 1) throw new Error('Amount must be at least 1.');
+    if (new Date(endDate) <= new Date(startDate)) throw new Error('End date must be after start date.');
     await Budget.create({
       name: name.trim(),
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       period,
       startDate,
       endDate,
@@ -78,10 +81,15 @@ exports.show = async (req, res) => {
     if (!isAdmin(req.user) && budget.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
-    const spentAmount = await getSpent(budget.user._id, budget.category._id, budget.startDate, budget.endDate);
+    const spentAmount = budget.category
+      ? await getSpent(budget.user._id, budget.category._id, budget.startDate, budget.endDate)
+      : 0;
     const remaining = budget.amount - spentAmount;
     const percentage = Math.min(Math.round((spentAmount / budget.amount) * 100), 100);
-    res.render('budgets/show', { title: budget.name, budget, spentAmount, remaining, percentage, user: req.user });
+    const expenseFilter = { user: budget.user._id, date: { $gte: new Date(budget.startDate), $lte: endOfDay(budget.endDate) } };
+    if (budget.category) expenseFilter.categories = budget.category._id;
+    const relatedExpenses = await Expense.find(expenseFilter).populate('categories', 'name color').sort({ date: -1 });
+    res.render('budgets/show', { title: budget.name, budget, spentAmount, remaining, percentage, relatedExpenses, user: req.user });
   } catch (err) {
     res.redirect('/budgets');
   }
@@ -111,8 +119,11 @@ exports.update = async (req, res) => {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     const { name, amount, period, startDate, endDate, category } = req.body;
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount < 1) throw new Error('Amount must be at least 1.');
+    if (new Date(endDate) <= new Date(startDate)) throw new Error('End date must be after start date.');
     budget.name = name.trim();
-    budget.amount = parseFloat(amount);
+    budget.amount = parsedAmount;
     budget.period = period;
     budget.startDate = startDate;
     budget.endDate = endDate;

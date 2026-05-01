@@ -26,7 +26,7 @@
         <span class="detail-label">Date</span>
         <span class="detail-value"><%= new Date(expense.date).toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) %></span>
       </div>
-      <% if (user.role === 'admin') { %>
+      <% if (user.role === 'admin' || user.role === 'superadmin') { %>
       <div class="detail-item">
         <span class="detail-label">Owner</span>
         <span class="detail-value"><%= expense.user.name %> (<%= expense.user.email %>)</span>
