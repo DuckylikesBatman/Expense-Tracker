@@ -1,18 +1,8 @@
 const Budget = require('../models/Budget');
 const Category = require('../models/Category');
-const Expense = require('../models/Expense');
+const { endOfDay, getSpent } = require('../utils/budgetUtils');
 
 const isAdmin = (user) => ['admin', 'superadmin'].includes(user.role);
-const endOfDay = (d) => { const dt = new Date(d); dt.setHours(23, 59, 59, 999); return dt; };
-
-const getSpent = async (userId, categoryId, startDate, endDate) => {
-  const expenses = await Expense.find({
-    user: userId,
-    categories: categoryId,
-    date: { $gte: new Date(startDate), $lte: endOfDay(endDate) }
-  });
-  return expenses.reduce((sum, e) => sum + e.amount, 0);
-};
 
 // GET /budgets
 exports.index = async (req, res) => {
@@ -25,7 +15,7 @@ exports.index = async (req, res) => {
 
     const budgetsWithSpending = await Promise.all(
       budgets.map(async (b) => {
-        if (!b.category) return { budget: b, spentAmount: 0, percentage: 0, isOverBudget: false, remaining: b.amount };
+        if (!b.category || !b.user) return { budget: b, spentAmount: 0, percentage: 0, isOverBudget: false, remaining: b.amount };
         const spentAmount = await getSpent(b.user._id, b.category._id, b.startDate, b.endDate);
         const percentage = Math.min(Math.round((spentAmount / b.amount) * 100), 100);
         return { budget: b, spentAmount, percentage, isOverBudget: spentAmount > b.amount, remaining: b.amount - spentAmount };
@@ -77,7 +67,7 @@ exports.show = async (req, res) => {
     const budget = await Budget.findById(req.params.id)
       .populate('user', 'name email')
       .populate('category', 'name color');
-    if (!budget) return res.redirect('/budgets');
+    if (!budget || !budget.user) return res.redirect('/budgets');
     if (!isAdmin(req.user) && budget.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }

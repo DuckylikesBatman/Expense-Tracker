@@ -88,7 +88,7 @@ exports.loginAsGuest = async (req, res) => {
       guest = await User.create({
         name: 'Guest',
         email: 'guest@expensetracker.com',
-        password: 'guest1234',
+        password: process.env.GUEST_PASSWORD || 'guest1234',
         role: 'user'
       });
     }

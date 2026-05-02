@@ -22,7 +22,7 @@ async function seedRole(email, password, name, role) {
     }
   } else {
     await User.create({ name, email, password, role });
-    console.log(`${role} account created: ${email} / ${password}`);
+    console.log(`${role} account created: ${email}`);
   }
 }
 

@@ -1,12 +1,12 @@
 const Expense = require('../models/Expense');
 const Category = require('../models/Category');
 
+const isAdmin = (user) => ['admin', 'superadmin'].includes(user.role);
 
 // GET /expenses
 exports.index = async (req, res) => {
   try {
-    const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
-    const filter = isAdmin ? {} : { user: req.user._id };
+    const filter = isAdmin(req.user) ? {} : { user: req.user._id };
 
     const { search, category, dateFrom, dateTo } = req.query;
     if (search) filter.title = { $regex: search.trim(), $options: 'i' };
@@ -42,8 +42,7 @@ exports.index = async (req, res) => {
 // GET /expenses/export
 exports.exportCSV = async (req, res) => {
   try {
-    const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
-    const filter = isAdmin ? {} : { user: req.user._id };
+    const filter = isAdmin(req.user) ? {} : { user: req.user._id };
     const expenses = await Expense.find(filter)
       .populate('categories', 'name')
       .populate('user', 'name')
@@ -110,7 +109,7 @@ exports.show = async (req, res) => {
       .populate('user', 'name email')
       .populate('categories', 'name color description');
     if (!expense) return res.redirect('/expenses');
-    if (!['admin', 'superadmin'].includes(req.user.role) && expense.user._id.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && expense.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     res.render('expenses/show', { title: expense.title, expense, user: req.user });
@@ -124,7 +123,7 @@ exports.editForm = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id).populate('categories');
     if (!expense) return res.redirect('/expenses');
-    if (!['admin', 'superadmin'].includes(req.user.role) && expense.user.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && expense.user.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     const categories = await Category.find().sort({ name: 1 });
@@ -139,7 +138,7 @@ exports.update = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.redirect('/expenses');
-    if (!['admin', 'superadmin'].includes(req.user.role) && expense.user.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && expense.user.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     const { title, amount, date, description, categories } = req.body;
@@ -165,7 +164,7 @@ exports.destroy = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.redirect('/expenses');
-    if (!['admin', 'superadmin'].includes(req.user.role) && expense.user.toString() !== req.user._id.toString()) {
+    if (!isAdmin(req.user) && expense.user.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
     await Expense.findByIdAndDelete(req.params.id);
