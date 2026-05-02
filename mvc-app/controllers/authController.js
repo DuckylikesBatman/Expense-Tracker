@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 function signToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    expiresIn: process.env.JWT_EXPIRES_IN || '1d'
   });
 }
 
@@ -12,13 +12,13 @@ function sendTokenCookie(res, token) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 1 * 24 * 60 * 60 * 1000 // 1 day
   });
 }
 
 // GET /auth/login
 exports.getLogin = (req, res) => {
-  if (res.locals.user) return res.redirect('/expenses');
+  if (res.locals.user) return res.redirect('/dashboard');
   res.render('auth/login', { title: 'Login', error: null });
 };
 
@@ -35,7 +35,7 @@ exports.postLogin = async (req, res) => {
     }
     const token = signToken(user._id);
     sendTokenCookie(res, token);
-    res.redirect('/expenses');
+    res.redirect('/dashboard');
   } catch (err) {
     res.render('auth/login', { title: 'Login', error: 'Something went wrong. Please try again.' });
   }
@@ -43,7 +43,7 @@ exports.postLogin = async (req, res) => {
 
 // GET /auth/register
 exports.getRegister = (req, res) => {
-  if (res.locals.user) return res.redirect('/expenses');
+  if (res.locals.user) return res.redirect('/dashboard');
   res.render('auth/register', { title: 'Register', error: null });
 };
 
@@ -94,7 +94,7 @@ exports.loginAsGuest = async (req, res) => {
     }
     const token = signToken(guest._id);
     sendTokenCookie(res, token);
-    res.redirect('/expenses');
+    res.redirect('/dashboard');
   } catch (err) {
     res.render('auth/login', { title: 'Login', error: 'Could not log in as guest.' });
   }
