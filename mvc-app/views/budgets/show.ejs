@@ -28,7 +28,9 @@
       </div>
       <div class="detail-item">
         <span class="detail-label">Remaining</span>
-        <span class="detail-value amount-large" style="color:<%= remaining < 0 ? '#f87171' : '#a78bfa' %>">$<%= remaining.toFixed(2) %></span>
+        <span class="detail-value amount-large" style="color:<%= remaining < 0 ? '#f87171' : '#a78bfa' %>">
+          <%= remaining >= 0 ? '$' + remaining.toFixed(2) : '-$' + Math.abs(remaining).toFixed(2) %>
+        </span>
       </div>
       <div class="detail-item">
         <span class="detail-label">Period</span>

@@ -1,5 +1,6 @@
 const Budget = require('../models/Budget');
 const Category = require('../models/Category');
+const Expense = require('../models/Expense');
 const { endOfDay, getSpent } = require('../utils/budgetUtils');
 
 const isAdmin = (user) => ['admin', 'superadmin'].includes(user.role);

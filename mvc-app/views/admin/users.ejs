@@ -84,7 +84,7 @@
                   <a href="/admin/users/<%= u._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
                 <% } %>
                 <% if (canDelete) { %>
-                  <form action="/admin/users/<%= u._id %>?_method=DELETE" method="POST" style="display:inline" onsubmit="return confirm('Delete user <%= u.name %>?')">
+                  <form action="/admin/users/<%= u._id %>?_method=DELETE" method="POST" style="display:inline" data-name="<%= u.name %>" onsubmit="return confirm('Delete user ' + this.dataset.name + '?')">
                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                   </form>
                 <% } %>

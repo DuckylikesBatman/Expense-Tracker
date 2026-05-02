@@ -13,7 +13,6 @@
   <%- include('../partials/flash') %>
 
   <div class="form-card card">
-    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
     <form action="/income/<%= entry._id %>?_method=PUT" method="POST" class="form">
       <div class="form-row">
         <div class="form-group">

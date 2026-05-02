@@ -92,9 +92,12 @@ exports.updateUser = async (req, res) => {
       if (target.role === 'superadmin' && target._id.toString() !== req.user._id.toString()) {
         return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
       }
-      // Superadmin cannot change their own role
+      // Superadmin cannot change their own role; only user/admin roles assignable via UI
       if (target._id.toString() !== req.user._id.toString()) {
-        updates.role = req.body.role;
+        const allowedRoles = ['user', 'admin'];
+        if (allowedRoles.includes(req.body.role)) {
+          updates.role = req.body.role;
+        }
       }
     }
 
