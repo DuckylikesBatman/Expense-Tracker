@@ -32,12 +32,16 @@
       <% budgetsWithSpending.forEach(item => { %>
         <% const b = item.budget %>
         <% const barColor = item.percentage >= 100 ? '#f87171' : item.percentage >= 80 ? '#fbbf24' : '#6af1d2' %>
-        <div class="budget-card card <%= item.isOverBudget ? 'card-over-budget' : '' %>">
+        <% const isExpired = new Date(b.endDate) < new Date() %>
+        <div class="budget-card card <%= item.isOverBudget ? 'card-over-budget' : isExpired ? 'card-expired' : '' %>">
           <div class="budget-header">
             <h3><a href="/budgets/<%= b._id %>" class="table-link"><%= b.name %></a></h3>
-            <% if (b.category) { %>
-              <span class="badge" style="background:<%= b.category.color %>22;border-color:<%= b.category.color %>55;color:<%= b.category.color %>"><%= b.category.name %></span>
-            <% } %>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <% if (isExpired) { %><span class="expired-badge">Expired</span><% } %>
+              <% if (b.category) { %>
+                <span class="badge" style="background:<%= b.category.color %>22;border-color:<%= b.category.color %>55;color:<%= b.category.color %>"><%= b.category.name %></span>
+              <% } %>
+            </div>
           </div>
 
           <div class="budget-amounts-row">
@@ -51,7 +55,7 @@
             </div>
             <div>
               <span class="budget-mini-label">Left</span>
-              <div class="budget-remaining" style="color:<%= item.remaining < 0 ? '#f87171' : '#6af1d2' %>">
+              <div class="budget-remaining" style="color:<%= item.remaining < 0 ? '#f87171' : '#a78bfa' %>">
                 <%= item.remaining >= 0 ? '$' + item.remaining.toFixed(2) : '-$' + Math.abs(item.remaining).toFixed(2) %>
               </div>
             </div>
@@ -72,7 +76,7 @@
             <span class="period-badge"><%= b.period %></span>
             <span><%= new Date(b.startDate).toLocaleDateString() %> – <%= new Date(b.endDate).toLocaleDateString() %></span>
           </div>
-          <% if (user.role === 'admin' || user.role === 'superadmin') { %>
+          <% if ((user.role === 'admin' || user.role === 'superadmin') && b.user) { %>
             <p class="cat-meta" style="margin-top:6px">Owner: <%= b.user.name %></p>
           <% } %>
           <div class="action-group" style="margin-top:12px">

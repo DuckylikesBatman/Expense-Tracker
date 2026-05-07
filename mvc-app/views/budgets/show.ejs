@@ -3,10 +3,11 @@
 <%- include('../partials/navbar') %>
 
 <main class="main-content">
+  <% const isExpired = new Date(budget.endDate) < new Date() %>
   <div class="page-header">
     <div>
       <a href="/budgets" class="back-link">&larr; Back to Budgets</a>
-      <h1><%= budget.name %></h1>
+      <h1><%= budget.name %> <% if (isExpired) { %><span class="expired-badge">Expired</span><% } %></h1>
     </div>
     <div class="action-group">
       <a href="/budgets/<%= budget._id %>/edit" class="btn btn-outline">Edit</a>
