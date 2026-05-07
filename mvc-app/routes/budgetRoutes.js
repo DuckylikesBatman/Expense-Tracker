@@ -1,3 +1,4 @@
+// Budget routes: all require login; ownership is enforced inside the controller, not at the route level
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/budgetController');

@@ -23,13 +23,15 @@ const expenseSchema = new mongoose.Schema({
     trim: true,
     maxlength: [500, 'Description cannot exceed 500 characters']
   },
-  // One-to-many: each expense belongs to one user
+  // One-to-many relationship: many expenses belong to one user
+  // ObjectId is MongoDB's unique ID type; ref: 'User' enables .populate() to fetch the full user document
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  // Many-to-many: an expense can have multiple categories
+  // Many-to-many relationship: one expense can belong to multiple categories
+  // Stored as an array of ObjectIds; use .populate('categories') to resolve them
   categories: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category'

@@ -1,3 +1,4 @@
+// Dashboard controller: aggregates data from all collections to build the summary view
 const Expense = require('../models/Expense');
 const Budget = require('../models/Budget');
 const Category = require('../models/Category');
@@ -8,29 +9,30 @@ exports.index = async (req, res) => {
   try {
     const userId = req.user._id;
     const now = new Date();
+    // First day of the current month — used to scope "this month" queries
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // This month's expenses
+    // Fetch all expenses from this month (needed for total, count, and category breakdown)
     const monthlyExpenses = await Expense.find({ user: userId, date: { $gte: startOfMonth } })
       .populate('categories', 'name color');
     const spentThisMonth = monthlyExpenses.reduce((s, e) => s + e.amount, 0);
     const expenseCountThisMonth = monthlyExpenses.length;
 
-    // Extra income this month
+    // Extra income = one-off income entries logged this month (not the fixed monthlyIncome)
     const extraIncomeEntries = await IncomeEntry.find({ user: userId, date: { $gte: startOfMonth } });
     const extraIncomeThisMonth = extraIncomeEntries.reduce((s, e) => s + e.amount, 0);
 
-    // All-time total
+    // All-time total across every expense ever recorded by this user
     const allExpenses = await Expense.find({ user: userId });
     const totalAllTime = allExpenses.reduce((s, e) => s + e.amount, 0);
 
-    // Recent 5 expenses
+    // Last 5 expenses for the "recent activity" widget
     const recentExpenses = await Expense.find({ user: userId })
       .populate('categories', 'name color')
       .sort({ date: -1 })
       .limit(5);
 
-    // Budgets with spending
+    // Load budgets and enrich each with live spending data
     const budgets = await Budget.find({ user: userId })
       .populate('category', 'name color')
       .sort({ createdAt: -1 });
@@ -44,7 +46,8 @@ exports.index = async (req, res) => {
 
     const overBudgetCount = budgetsWithSpending.filter(b => b.isOverBudget).length;
 
-    // Category breakdown this month
+    // Build category spending breakdown by grouping this month's expenses
+    // Uses a plain object as a map: category._id → { name, color, total }
     const categoryTotals = {};
     monthlyExpenses.forEach(e => {
       e.categories.forEach(cat => {
@@ -52,6 +55,7 @@ exports.index = async (req, res) => {
         categoryTotals[cat._id].total += e.amount;
       });
     });
+    // Sort by highest spend and take the top 5 for the chart
     const topCategories = Object.values(categoryTotals).sort((a, b) => b.total - a.total).slice(0, 5);
 
     res.render('dashboard/index', {
@@ -68,6 +72,7 @@ exports.index = async (req, res) => {
       extraIncomeThisMonth
     });
   } catch (err) {
+    // On error, render the page with empty/zero values so the UI doesn't crash
     res.render('dashboard/index', {
       title: 'Dashboard',
       user: req.user,

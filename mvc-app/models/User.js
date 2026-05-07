@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+// User is the central entity — Expenses, Budgets, Categories, and IncomeEntries all reference it
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -11,7 +12,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Email is required'],
-    unique: true,
+    unique: true,        // MongoDB creates a unique index on this field
     lowercase: true,
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
@@ -20,10 +21,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters']
+    // Stored as a bcrypt hash, never plain text
   },
   role: {
     type: String,
-    enum: ['superadmin', 'admin', 'user'],
+    enum: ['superadmin', 'admin', 'user'],  // only these 3 values are valid
     default: 'user'
   },
   monthlyIncome: {
@@ -31,16 +33,16 @@ const userSchema = new mongoose.Schema({
     default: 0,
     min: [0, 'Income cannot be negative']
   }
-}, { timestamps: true });
+}, { timestamps: true }); // timestamps adds createdAt and updatedAt automatically
 
-// Hash password before saving
+// Pre-save hook: runs before every .save() — hashes the password only if it was changed
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
+  if (!this.isModified('password')) return next(); // skip hashing if password unchanged
+  this.password = await bcrypt.hash(this.password, 12); // 12 = salt rounds (higher = slower = more secure)
   next();
 });
 
-// Compare plain password with hashed
+// Instance method: compares a plain-text password against the stored hash at login time
 userSchema.methods.comparePassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };

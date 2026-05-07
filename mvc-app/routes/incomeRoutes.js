@@ -1,3 +1,4 @@
+// Income entry routes — no separate show page; editing happens inline from the list view
 const express = require('express');
 const router = express.Router();
 const { index, create, editForm, update, destroy } = require('../controllers/incomeController');

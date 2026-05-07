@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// A budget sets a spending limit for a specific category within a date range
 const budgetSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -15,7 +16,7 @@ const budgetSchema = new mongoose.Schema({
   },
   period: {
     type: String,
-    enum: ['weekly', 'monthly', 'yearly'],
+    enum: ['weekly', 'monthly', 'yearly'], // descriptive label only; date range enforces the real window
     default: 'monthly'
   },
   startDate: {
@@ -32,7 +33,7 @@ const budgetSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  // A budget targets a specific category
+  // One-to-one: each budget tracks one category's spending
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
@@ -40,7 +41,8 @@ const budgetSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Virtual: compute spent amount (populated at query time)
+// Virtual property — computed at runtime, not stored in DB
+// Returns true if the budget's end date has already passed
 budgetSchema.virtual('isExpired').get(function () {
   return this.endDate < new Date();
 });

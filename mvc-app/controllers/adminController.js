@@ -3,9 +3,10 @@ const Expense = require('../models/Expense');
 const Category = require('../models/Category');
 const Budget = require('../models/Budget');
 
-// GET /admin/dashboard
+// GET /admin/dashboard — site-wide stats visible only to admins and superadmins
 exports.dashboard = async (req, res) => {
   try {
+    // Run all 4 count queries in parallel to avoid sequential DB round-trips
     const [userCount, expenseCount, categoryCount, budgetCount] = await Promise.all([
       User.countDocuments(),
       Expense.countDocuments(),
@@ -27,17 +28,19 @@ exports.dashboard = async (req, res) => {
   }
 };
 
-// GET /admin/users
+// GET /admin/users — list all users with optional search by name/email and filter by role
 exports.listUsers = async (req, res) => {
   try {
     const { search = '', role = '' } = req.query;
     const query = {};
 
     if (search.trim()) {
+      // $or lets us search across both name and email in one query
       const regex = new RegExp(search.trim(), 'i');
       query.$or = [{ name: regex }, { email: regex }];
     }
 
+    // Whitelist check prevents injecting arbitrary role values into the DB query
     if (role && ['user', 'admin', 'superadmin'].includes(role)) {
       query.role = role;
     }
@@ -57,13 +60,13 @@ exports.listUsers = async (req, res) => {
   }
 };
 
-// GET /admin/users/:id/edit
+// GET /admin/users/:id/edit — show edit form; admins cannot edit other admins or superadmins
 exports.editUserForm = async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.redirect('/admin/users');
 
-    // Admins cannot edit other admins or superadmins
+    // Role hierarchy enforcement: regular admins can only manage regular users
     if (req.user.role === 'admin' && target.role !== 'user') {
       return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
     }
@@ -74,13 +77,12 @@ exports.editUserForm = async (req, res) => {
   }
 };
 
-// PUT /admin/users/:id
+// PUT /admin/users/:id — update name (and optionally role for superadmins)
 exports.updateUser = async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.redirect('/admin/users');
 
-    // Admins cannot edit admins or superadmins
     if (req.user.role === 'admin' && target.role !== 'user') {
       return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
     }
@@ -88,11 +90,11 @@ exports.updateUser = async (req, res) => {
     const updates = { name: req.body.name.trim() };
 
     if (req.user.role === 'superadmin') {
-      // Superadmin can change roles, but cannot demote another superadmin
+      // Superadmin cannot demote another superadmin (only one top-level account)
       if (target.role === 'superadmin' && target._id.toString() !== req.user._id.toString()) {
         return res.status(403).render('403', { title: '403 – Forbidden', user: req.user });
       }
-      // Superadmin cannot change their own role; only user/admin roles assignable via UI
+      // Superadmin cannot accidentally change their own role through the UI
       if (target._id.toString() !== req.user._id.toString()) {
         const allowedRoles = ['user', 'admin'];
         if (allowedRoles.includes(req.body.role)) {
@@ -109,9 +111,10 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// DELETE /admin/users/:id
+// DELETE /admin/users/:id — enforces role hierarchy: superadmins are undeletable
 exports.deleteUser = async (req, res) => {
   try {
+    // Prevent self-deletion
     if (req.params.id === req.user._id.toString()) {
       return res.redirect('/admin/users');
     }
@@ -119,12 +122,12 @@ exports.deleteUser = async (req, res) => {
     const target = await User.findById(req.params.id);
     if (!target) return res.redirect('/admin/users');
 
-    // Nobody can delete a superadmin
+    // Superadmin accounts are protected — no one can delete them through the UI
     if (target.role === 'superadmin') {
       return res.redirect('/admin/users');
     }
 
-    // Admins can only delete regular users
+    // Regular admins can only delete regular users, not other admins
     if (req.user.role === 'admin' && target.role !== 'user') {
       return res.redirect('/admin/users');
     }

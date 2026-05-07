@@ -1,11 +1,11 @@
 const Category = require('../models/Category');
 const Expense = require('../models/Expense');
 
-// GET /categories
+// GET /categories — all users can view categories (read-only for regular users)
 exports.index = async (req, res) => {
   try {
     const categories = await Category.find()
-      .populate('createdBy', 'name')
+      .populate('createdBy', 'name') // show which admin created each category
       .sort({ name: 1 });
     res.render('categories/index', { title: 'Categories', categories, user: req.user });
   } catch (err) {
@@ -13,12 +13,12 @@ exports.index = async (req, res) => {
   }
 };
 
-// GET /categories/new  (admin only)
+// GET /categories/new — admin only; route-level authorize() enforces this in categoryRoutes.js
 exports.newForm = (req, res) => {
   res.render('categories/new', { title: 'New Category', user: req.user, error: null });
 };
 
-// POST /categories  (admin only)
+// POST /categories — admin only; records who created it via createdBy: req.user._id
 exports.create = async (req, res) => {
   try {
     const { name, description, color } = req.body;
@@ -30,17 +30,18 @@ exports.create = async (req, res) => {
     });
     res.redirect('/categories');
   } catch (err) {
+    // err.code 11000 = duplicate key (name must be unique across all categories)
     const msg = err.code === 11000 ? 'A category with that name already exists.' : err.message;
     res.render('categories/new', { title: 'New Category', user: req.user, error: msg });
   }
 };
 
-// GET /categories/:id
+// GET /categories/:id — show category details and expenses that use it
 exports.show = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id).populate('createdBy', 'name');
     if (!category) return res.redirect('/categories');
-    // Expenses that include this category
+    // Admins see all expenses in this category; regular users only see their own
     const expenseFilter = { categories: category._id };
     if (!['admin', 'superadmin'].includes(req.user.role)) {
       expenseFilter.user = req.user._id;
@@ -54,7 +55,7 @@ exports.show = async (req, res) => {
   }
 };
 
-// GET /categories/:id/edit  (admin only)
+// GET /categories/:id/edit — admin only
 exports.editForm = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -65,7 +66,7 @@ exports.editForm = async (req, res) => {
   }
 };
 
-// PUT /categories/:id  (admin only)
+// PUT /categories/:id — runValidators: true ensures Mongoose schema rules are re-checked on update
 exports.update = async (req, res) => {
   try {
     const { name, description, color } = req.body;
@@ -82,10 +83,11 @@ exports.update = async (req, res) => {
   }
 };
 
-// DELETE /categories/:id  (admin only)
+// DELETE /categories/:id — admin only
+// Cleans up references: removes this category from all expense records before deleting it
 exports.destroy = async (req, res) => {
   try {
-    // Remove this category reference from all expenses
+    // $pull removes the category ID from the categories array on every expense that had it
     await Expense.updateMany(
       { categories: req.params.id },
       { $pull: { categories: req.params.id } }

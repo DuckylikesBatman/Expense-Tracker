@@ -5,7 +5,7 @@ const { endOfDay, getSpent } = require('../utils/budgetUtils');
 
 const isAdmin = (user) => ['admin', 'superadmin'].includes(user.role);
 
-// GET /budgets
+// GET /budgets — list budgets with live spending data calculated for each one
 exports.index = async (req, res) => {
   try {
     const filter = isAdmin(req.user) ? {} : { user: req.user._id };
@@ -14,10 +14,13 @@ exports.index = async (req, res) => {
       .populate('category', 'name color')
       .sort({ createdAt: -1 });
 
+    // For each budget, calculate how much has been spent in its category during its date range
+    // Promise.all runs all queries in parallel instead of sequentially
     const budgetsWithSpending = await Promise.all(
       budgets.map(async (b) => {
         if (!b.category || !b.user) return { budget: b, spentAmount: 0, percentage: 0, isOverBudget: false, remaining: b.amount };
         const spentAmount = await getSpent(b.user._id, b.category._id, b.startDate, b.endDate);
+        // Cap percentage at 100 for the progress bar; isOverBudget can still be true
         const percentage = Math.min(Math.round((spentAmount / b.amount) * 100), 100);
         return { budget: b, spentAmount, percentage, isOverBudget: spentAmount > b.amount, remaining: b.amount - spentAmount };
       })
@@ -29,7 +32,7 @@ exports.index = async (req, res) => {
   }
 };
 
-// GET /budgets/new
+// GET /budgets/new — show form pre-loaded with all available categories
 exports.newForm = async (req, res) => {
   try {
     const categories = await Category.find().sort({ name: 1 });
@@ -39,12 +42,13 @@ exports.newForm = async (req, res) => {
   }
 };
 
-// POST /budgets
+// POST /budgets — validate dates and amount, then create the budget
 exports.create = async (req, res) => {
   try {
     const { name, amount, period, startDate, endDate, category } = req.body;
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount < 1) throw new Error('Amount must be at least 1.');
+    // Business rule: end date must come after start date
     if (new Date(endDate) <= new Date(startDate)) throw new Error('End date must be after start date.');
     await Budget.create({
       name: name.trim(),
@@ -62,7 +66,7 @@ exports.create = async (req, res) => {
   }
 };
 
-// GET /budgets/:id
+// GET /budgets/:id — show budget details including spending progress and related expenses
 exports.show = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id)
@@ -72,11 +76,13 @@ exports.show = async (req, res) => {
     if (!isAdmin(req.user) && budget.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).render('403', { title: 'Forbidden', user: req.user });
     }
+    // Calculate total spent in this budget's category within its date window
     const spentAmount = budget.category
       ? await getSpent(budget.user._id, budget.category._id, budget.startDate, budget.endDate)
       : 0;
     const remaining = budget.amount - spentAmount;
     const percentage = Math.min(Math.round((spentAmount / budget.amount) * 100), 100);
+    // Fetch the individual expenses that contributed to this budget's spending
     const expenseFilter = { user: budget.user._id, date: { $gte: new Date(budget.startDate), $lte: endOfDay(budget.endDate) } };
     if (budget.category) expenseFilter.categories = budget.category._id;
     const relatedExpenses = await Expense.find(expenseFilter).populate('categories', 'name color').sort({ date: -1 });
@@ -86,7 +92,7 @@ exports.show = async (req, res) => {
   }
 };
 
-// GET /budgets/:id/edit
+// GET /budgets/:id/edit — show edit form; owner or admin only
 exports.editForm = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
@@ -101,7 +107,7 @@ exports.editForm = async (req, res) => {
   }
 };
 
-// PUT /budgets/:id
+// PUT /budgets/:id — update budget fields with same date/amount validation as create
 exports.update = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
@@ -128,7 +134,7 @@ exports.update = async (req, res) => {
   }
 };
 
-// DELETE /budgets/:id
+// DELETE /budgets/:id — owner or admin only
 exports.destroy = async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
